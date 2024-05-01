@@ -12,10 +12,16 @@ editor: visual
 
 El reto #30DayChartChallenge, es una oportunidad para profundizar en técnicas de visualización, explorar nuevos herramientas y software, y producir trabajos que podrían ser utilizados en un portafolio profesional o en presentaciones laborales.<br>
 
-
 <b>Objetivos</b><br>* Perfeccionar la capacidad de elegir y aplicar el tipo de visualización más efectivo para distintos conjuntos de datos, garantizando que cada gráfico que cree no solo sea estéticamente atractivo, sino también informativamente preciso.<br>
 
 * Experimentar con estilos y formatos de visualización que  permitan explorar visualizaciones interactivas, así como integrar narrativas visuales más complejas.</div>
+```
+## Aclaraciones
+
+```{=html}
+<div style = "text-align:justify";>
+
+Para ciertos gráficos se muestra el enlace directo a la descarga de los datos utilizados. En otros gráficos se muestra el enlace de acceso a los datos en el apartado de bibliografía, ya que estos han sido preprocesados y se comparte cada uno de estos datasets a partir del enlace en el apartado de GitHub, para su descarga.</div>
 ```
 ## Comparisons
 
@@ -261,7 +267,7 @@ fig.update_layout(
     width=800,  # Ajusta el ancho del gráfico
     height=800,   # Ajusta la altura del gráfico
     # Aumentar margen inferior
-    margin=dict(t=150, l=0, r=0, b=50), 
+    margin=dict(t=150, l=0, r=0, b=100), 
     annotations=[
         # Mover la descripción para que aparezca debajo del título
         dict(
