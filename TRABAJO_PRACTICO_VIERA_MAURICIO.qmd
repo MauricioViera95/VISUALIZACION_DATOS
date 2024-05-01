@@ -1,0 +1,2572 @@
+---
+title: "PORTAFOLIO: #30DayChartChallenge"
+author: "MAURICIO VIERA"
+format: html
+editor: visual
+---
+
+## Introducción y Objetivos
+
+```{=html}
+<div style = "text-align:justify";>
+
+El reto #30DayChartChallenge, es una oportunidad para profundizar en técnicas de visualización, explorar nuevos herramientas y software, y producir trabajos que podrían ser utilizados en un portafolio profesional o en presentaciones laborales.<br>
+
+
+<b>Objetivos</b><br>* Perfeccionar la capacidad de elegir y aplicar el tipo de visualización más efectivo para distintos conjuntos de datos, garantizando que cada gráfico que cree no solo sea estéticamente atractivo, sino también informativamente preciso.<br>
+
+* Experimentar con estilos y formatos de visualización que  permitan explorar visualizaciones interactivas, así como integrar narrativas visuales más complejas.</div>
+```
+## Comparisons
+
+![](IMG_TEXTO/comparacion.jpg){alt="Descripción de la imagen"}
+
+-   Extracto del gráfico "¿Qué gráfico elegir?**"** compartido en recursos y materiales.
+
+### 1. part-to-whole
+
+![](IMG_TEXTO/GRAFICO1.jpg){style="float:right;" width="123" height="115"}
+
+Para esta temática se ha elegido utilizar datos sobre crimen específicamente en la ciudad de Los Ángeles. Por lo tanto, se espera que la audiencia sean las distintas unidades policiales de la ciudad (UCR), por ende, el gráfico está en la lengua natal, es decir, el inglés. Los datos son provistos por DATA.GOV (2024a) de los Estados Unidos (<https://catalog.data.gov/dataset/crime-data-from-2020-to-present>). Cabe recalcar que este dataset se utilizó para el proyecto de Minería de Datos.
+
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Se pretende dar a conocer una comparación de los crímenes cometidos según la raza de cada habitante de la ciudad.
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera obtener una imagen fidedigna de cómo los diferentes crímenes afectan a diversas comunidades en Los Ángeles, con la posibilidad de identificar patrones o desproporciones que podrían informar sobre necesidades específicas o respuestas de política.
+
+El mensaje principal que transmite este gráfico es que hay una distribución variada de crímenes entre diferentes comunidades raciales, lo que podría indicar la necesidad de enfoques diferenciados para abordar y prevenir el crimen en cada comunidad.</div>
+```
+```{python}
+#| label: load-packages
+#| include: false
+import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+```
+
+```{python}
+#| label: GRAFICO1_CARGA_DATOS
+#| warning: false
+#| echo: false
+
+# Lectura de los datos
+# Cargando el dataset
+crimen = pd.read_csv('DATOS/crimen.csv')
+```
+
+```{python}
+#| label: GRAFICO1_PROCESAMIENTO
+#| warning: false
+#| echo: false
+
+# Usando la función 'replace' para agrupar las categorías especificadas en 'Other'
+categorias_a_agrupar = ['Unknown', 'American Indian/Alaskan Native', 'Other', 'Pacific Islander', 'Asian Indian']
+crimen['Vict Descent'] = crimen['Vict Descent'].replace(categorias_a_agrupar, 'Other')
+
+
+# Buscar la frecuencia de los datos
+frecuencia = crimen.groupby(['Vict Descent', 'Crime Category']).size().reset_index(name='counts')
+
+# Establecer un umbral mínimo de casos
+umbral_minimo_de_casos = 3000
+
+# Filtrar las combinaciones que cumplen con el umbral
+frecuencia_filtrada = frecuencia[frecuencia['counts'] >= umbral_minimo_de_casos]
+
+# A partir del DataFrame filtrado, calcular los porcentajes y preparamos las etiquetas
+total_by_descent_filtrado = frecuencia_filtrada.groupby('Vict Descent')['counts'].transform('sum')
+frecuencia_filtrada['percentage'] = (frecuencia_filtrada['counts'] / total_by_descent_filtrado * 100).round(2)
+frecuencia_filtrada['label'] = frecuencia_filtrada['Crime Category'] + ' (' + frecuencia_filtrada['percentage'].astype(str) + '%)'
+```
+
+```{python}
+#| label: GRAFICO1_FIGURA
+#| warning: false
+#| echo: false
+
+# Generar el gráfico Sunburst
+fig = px.sunburst(frecuencia_filtrada, path=['Vict Descent', 'label'], values='counts',
+                  title="Distribution of Crime Categories by Race of Victim in Los Angeles")
+
+# Ajustes de tamaño, centrado del título, márgenes y anotaciones
+fig.update_layout(
+    autosize=True,
+    width=None,  # Ancho
+    height=1000,   # Alto
+    title=dict(
+        x=0.5,  # Centrar el título
+        xanchor='center',
+        y=0.95  # Ajustar la posición vertical del título
+    ),
+    margin=dict(t=150, l=100, r=100, b=120),  # Ajustar márgenes para anotaciones
+    annotations=[
+        dict(
+            text="This Sunburst chart visualizes the distribution of crime categories<br>across different racial groups of victims in Los Angeles, highlighting<br>the proportion of each crime category within specific racial demographics.<br>It provides insights into how crime impacts diverse communities.",
+            showarrow=False,
+            xref="paper",
+            yref="paper",
+            x=0.5,
+            xanchor="center",
+            y=1.11,  # Ajustar según sea necesario para la visibilidad
+            align="center",
+            font=dict(size=14),
+            opacity=0.8
+        ),
+        dict(
+            text="Author: Mauricio Viera | Source: https://catalog.data.gov/dataset/crime-data-from-2020-to-present",
+            showarrow=False,
+            xref="paper",
+            yref="paper",
+            x=0.5,
+            xanchor="center",
+            y=-0.05,  # Ajuste para que la fuente aparezca fuera del área del gráfico
+            align="center",
+            font=dict(size=12),
+            opacity=0.6
+        )
+    ]
+)
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta elegida, en este caso, un gráfico sunburst (Python y librería Plotly), fue seleccionada por su capacidad para manejar datos complejos y presentarlos de manera que es tanto informativa como visualmente atractiva. Permite una representación jerárquica de los datos que es ideal para mostrar las capas de información dentro de la estructura general de los datos de crimen.<br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/74/#/">https://chart-studio.plotly.com/~MauricioViera95/74/#/</a>
+
+</div>
+```
+### 2. neo
+
+En este caso se vuelve a utilizar los mismos datos, por lo tanto, la audiencia es la misma UCR.
+
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Desglosar y comunicar cómo los patrones de crimen varían entre los géneros y las edades, con el fin de ofrecer una visión detallada que pueda ser crucial para el diseño de estrategias de prevención y políticas de seguridad pública.<br>
+
+<b>¿Qué espera la audiencia?</b> Que las UCR puedan obtener insights claros sobre la prevalencia y el tipo de crímenes que ocurren en distintos demográficos. Buscan entender mejor dónde podrían enfocarse los esfuerzos de prevención y qué grupos podrían necesitar más recursos o atención.<br>
+
+El mensaje principal de este diagrama de flujo es destacar la relación entre género, edad y tipos de delitos, resaltando los flujos más predominantes y potencialmente preocupantes de criminalidad. Esto puede servir para iniciar conversaciones y análisis más profundos sobre causas y medidas preventivas.
+
+</div>
+```
+```{python}
+#| label: GRAFICO2_CARGA_DATOS
+#| warning: false
+#| echo: false
+#| 
+# Lectura de los datos
+# Cargar el dataset
+crimen = pd.read_csv('DATOS/crimen.csv')
+```
+
+```{python}
+#| label: GRAFICO2_PROCESAMIENTO
+#| warning: false
+#| echo: false
+
+
+# Contar la cantidad de crímenes para cada combinación de Vict Sex y Crime Category
+crimen_counts = crimen.groupby(['Vict Sex', 'Crime Category']).size().reset_index(name='counts')
+
+# Definir los bins de edad y las etiquetas para los grupos
+bins = [0, 17, 35, 55, float('inf')]
+labels = ['Children and Adolescents', 'Young Adults', 'Adults', 'Seniors']
+
+# Crear una nueva columna en el DataFrame con las categorías de edad
+crimen['Age Group'] = pd.cut(crimen['Vict Age'], bins=bins, labels=labels, right=False)
+
+# Verificar la nueva distribución de las categorías de edad
+crimen['Age Group'].value_counts()
+
+# Agrupar y contar incidencias para cada combinación de variables, ajustando para el flujo deseado
+grupo = crimen.groupby(['Vict Sex', 'Age Group', 'Crime Category']).size().reset_index(name='counts')
+
+# Preparar datos para los nodos y enlaces
+source = []
+target = []
+value = []
+
+node_names = []
+node_map = {}
+
+# Índices para mantener el orden de inserción
+last_sex_index = 0
+last_age_index = 0
+
+for _, row in grupo.iterrows():
+    sex = row['Vict Sex']
+    age_group = f"{row['Age Group']}"
+    category = row['Crime Category']
+    
+    # Comprobar y añadir género si es necesario
+    if sex not in node_map:
+        node_map[sex] = len(node_names)
+        node_names.append(sex)
+        last_sex_index = max(last_sex_index, node_map[sex])
+    
+    # Comprobar y añadir grupo de edad si es necesario
+    combined_sex_age = f"{sex}-{age_group}"
+    if combined_sex_age not in node_map:
+        node_map[combined_sex_age] = len(node_names)
+        node_names.append(combined_sex_age)
+        last_age_index = max(last_age_index, node_map[combined_sex_age])
+    
+    # Comprobar y añadir categoría de crimen si es necesario
+    if category not in node_map:
+        node_map[category] = len(node_names)
+        node_names.append(category)
+    
+    # Añadir enlace de género a grupo de edad
+    source.append(node_map[sex])
+    target.append(node_map[combined_sex_age])
+    value.append(row['counts'])
+    
+    # Añadir enlace de grupo de edad a categoría de crimen
+    source.append(node_map[combined_sex_age])
+    target.append(node_map[category])
+    value.append(row['counts'])
+
+```
+
+```{python}
+#| label: GRAFICO2_FIGURA
+#| warning: false
+#| echo: false
+
+import plotly.graph_objects as go
+
+# Asumiendo que 'source', 'target', 'value', y 'node_names' ya están definidos para el gráfico de Sankey
+
+fig = go.Figure(data=[go.Sankey(
+    node=dict(
+        pad=15,
+        thickness=20,
+        line=dict(color='black', width=0.5),
+        label=node_names,
+    ),
+    link=dict(
+        source=source,
+        target=target,
+        value=value,
+    ))])
+
+# Ajustar el tamaño del gráfico si es necesario
+fig.update_layout(
+    title_text="Crime Flow: Gender → Age Group → Category",
+    title_x=0.5,  # Centrar el título
+    width=800,  # Ajusta el ancho del gráfico
+    height=800,   # Ajusta la altura del gráfico
+    # Aumentar margen inferior
+    margin=dict(t=150, l=0, r=0, b=50), 
+    annotations=[
+        # Mover la descripción para que aparezca debajo del título
+        dict(
+            text="This graph shows how crimes flow from victim gender, through age group, to specific crime categories in the city of Los Angeles.",
+            showarrow=False,
+            align="left",
+            x=0.5, y=1.05,
+            xref="paper", yref="paper",
+            xanchor="center",
+            yanchor="bottom",
+            font=dict(size=12)
+        ),
+        # Ajustar la posición de la fuente para que aparezca en la parte inferior
+        dict(
+            text="Author: Mauricio Viera | Source: https://catalog.data.gov/dataset/crime-data-from-2020-to-present",
+            showarrow=False,
+            align="left",
+            x=0.5, y=-0.1,
+            xref="paper", yref="paper",
+            xanchor="center",
+            yanchor="top",
+            font=dict(size=12)
+        ),
+        # Ajustar la leyenda para 'Vict Sex' y colocarla en la izquierda superior
+        dict(
+            text="<b>Genre</b><br>F: Female<br>M: Male<br>X: Others",
+            showarrow=False,
+            align="left",
+            x=0, y=0.98,
+            xref="paper", yref="paper",
+            xanchor="left",
+            yanchor="top",
+            font=dict(size=12)
+        )
+    ]
+)
+
+fig.show()
+
+```
+
+```{=html}
+<div style = "text-align:justify";>
+
+La herramienta utilizada para este gráfico fue seleccionada por su habilidad para representar flujos y transferencias de información de manera intuitiva. Los diagramas de Sankey (Python y librería Plotly) son ideales para visualizar procesos o relaciones complejas de una manera que es tanto estética como funcionalmente informativa. Este tipo de gráfico ayuda a la audiencia a seguir el 'viaje' del crimen a través de diferentes cohortes de víctimas y a comprender cómo se acumulan o dispersan estos crímenes en varias categorías.
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href=https://chart-studio.plotly.com/~MauricioViera95/76/#/>https://chart-studio.plotly.com/~MauricioViera95/76/#/</a>
+
+</div>
+```
+### 3. makeover
+
+En esta temática se ha procedido a realizar un 'makeover' de una gráfica que puede generar confusión. Dicha gráfica ha sido compartida en X (<https://x.com/fentasyl/status/1771575235424203209>) .
+
+Los datos pertenecen al departamento de policía de la ciudad de New York, NYPD (2024) (<https://www.nyc.gov/site/nypd/stats/reports-analysis/homicide.page>).
+
+![](IMG_TEXTO/GRAFICO3.jpg){fig-align="center" width="234"}
+
+![](IMG_TEXTO/DIA_3_1.jpeg){fig-align="center" width="898"}
+
+```{=html}
+<div  style = "text-align:justify";>
+
+El gráfico original parece estar dirigido a un público general interesado en las estadísticas de crímenes en Nueva York. En cambio, el gráfico está enfocado hacia un público que busca una interpretación más detallada y crítica de las estadísticas, como pueden ser analistas de datos, responsables de políticas públicas o activistas sociales, dada la inclusión de un análisis comparativo más profundo.<br>
+
+<b>¿Qué se espera de la gráfica?</b> Se propone mejorar el mensaje del gráfico original, pues, como se puede apreciar, se utiliza una escala acumulativa al 400%, por lo tanto, la visualización puede confundir y sugerir que se está comparando más de un conjunto completo de datos, lo que distorsiona la comprensión.
+
+Por lo tanto, el objetivo es, presentar una comparación simple de la distribución del porcentaje de asesinatos por raza del perpetrador y la víctima.<br>
+
+<b>¿Qué espera la audiencia?</b> La audiencia podrá comprender las complejidades y las historias detrás de los números, como por qué ciertos grupos raciales parecen estar sobrerrepresentados en ciertas categorías.
+
+El gráfico rediseñado transmite un mensaje más matizado, que invita a la audiencia a reflexionar sobre las interacciones entre las razas de las víctimas y los perpetradores de asesinatos, y cómo esto se refleja en el contexto social más amplio de Nueva York.<br><br>
+
+</div>
+```
+<iframe title="ASESINATOS EN NYC 2023" aria-label="Grouped Columns" id="datawrapper-chart-T4Sao" src="https://datawrapper.dwcdn.net/T4Sao/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="541" data-external="1">
+
+</iframe>
+
+```{=html}
+<script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
+</script>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+El gráfico rediseñado, creado con Datawrapper según la información proporcionada, fue elegido por su capacidad para crear visualizaciones más sofisticadas y accesibles, con un diseño mejorado que permite comparaciones más claras y una narrativa más fuerte a través del uso de colores y anotaciones mejoradas.
+
+El rediseño brinda un mejor contraste y comparación entre las categorías raciales y proporciona porcentajes que permiten una lectura más rápida y una comparación directa entre las categorías.
+
+</div>
+```
+### 4. waffle
+
+```{=html}
+<div style = "text-align:justify";>
+
+Para esta temática se ha utilizado los mismos datos de crímenes en la ciudad de New York.
+
+La visualización está dirigida a un público que está interesado en la dinámica racial y social de los crímenes, posiblemente incluyendo a responsables de la formulación de políticas, investigadores sociales, y el público general que busca entender las relaciones raciales en el contexto de crímenes violentos.
+
+</div>
+```
+![](IMG_TEXTO/DIA_4.jpeg){fig-align="center" width="1935"}
+
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Comparar la distribución racial de las víctimas de homicidios en relación con la raza de los perpetradores. Se destaca las proporciones y posibles disparidades raciales en estos crímenes, al presentar los datos de una manera que facilita la comparación visual directa entre diferentes razas.<br>
+
+<b>¿Qué espera la audiencia?</b> Se espera que los tomadores de decisiones obtengan una comprensión clara de la correlación entre la raza de los perpetradores y las víctimas en los homicidios. Se expone una gráfica para reconocer patrones que podrían indicar desigualdades sistémicas o sesgos en la victimización de asesinatos según la raza.<br>
+
+El mensaje que transmite el gráfico es que existe una distribución desigual en las tasas de homicidios entre las diferentes razas. La forma de "waffle" de los gráficos proporciona una representación visual del tamaño relativo de cada grupo racial entre las víctimas, lo que puede indicar áreas que requieren atención específica o recursos adicionales.<br>
+
+La herramienta utilizada es R y el tipo de gráfico "waffle", debido a su efectividad para representar proporciones y hacer comparaciones rápidas entre categorías mediante el uso del área de bloques de colores, lo que permite a la audiencia estimar visualmente las diferencias entre los grupos.
+
+</div>
+```
+### 5. diverging
+
+```{=html}
+<div style = "text-align:justify";>
+
+Para esta temática, se ha cambiado totalmente de audiencia, se propone analizar datos del Ministerio de Educación del Ecuador [MINEDUC] (2024).
+
+El gráfico está dirigido a partes interesadas en el sistema educativo de Ecuador, incluyendo a los formuladores de políticas, autoridades educativas, investigadores y posiblemente al público general interesado en entender cómo se distribuye el soporte a las instituciones educativas por provincia.
+
+</div>
+```
+![](IMG_TEXTO/MINEDUC.jpg){fig-align="center" width="150"}
+
+```{python}
+#| label: GRAFICO5_DATOS
+#| warning: false
+#| echo: false
+#| 
+
+# Leer el dataset
+df = pd.read_excel('DATOS/educacion.xlsx')
+
+```
+
+```{python}
+#| label: GRAFICO5_FIGURA
+#| warning: false
+#| echo: false
+#| 
+
+# Procesar los datos para obtener el porcentaje de cada tipo de sostenimiento por provincia
+sostenimiento_percentages = df.groupby('Provincia')['Sostenimiento'].value_counts(normalize=True).unstack(fill_value=0) * 100
+
+# Crear el gráfico divergente
+fig = go.Figure()
+
+# Agregar barras para cada tipo de sostenimiento
+for column, color in zip(sostenimiento_percentages.columns, ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']):
+    if column in ['Fiscal', 'Municipal']:  # Barras a la izquierda de 0%
+        fig.add_trace(go.Bar(
+            y=sostenimiento_percentages.index,
+            x=-sostenimiento_percentages[column],  # Valores negativos para invertir la dirección
+            name=column,
+            orientation='h',
+            text=[f'{value:.2f}%' for value in sostenimiento_percentages[column]],
+            textposition='inside',
+            insidetextanchor='middle',
+            marker=dict(color=color)  # Colores distintivos para 'Fiscal' y 'Municipal'
+        ))
+    else:  # Barras a la derecha de 0%
+        fig.add_trace(go.Bar(
+            y=sostenimiento_percentages.index,
+            x=sostenimiento_percentages[column],
+            name=column,
+            orientation='h',
+            text=[f'{value:.2f}%' for value in sostenimiento_percentages[column]],
+            textposition='inside',
+            insidetextanchor='middle',
+            marker=dict(color=color)  # Colores distintivos para 'Particular' y 'Fiscomisional'
+        ))
+
+# Ajustar el diseño del gráfico, modificando márgenes y añadiendo anotación para el autor
+fig.update_layout(
+    title=dict(
+        text='<b>Sostenimiento de las instituciones educativas por provincia del Ecuador</b>',
+        x=0.5,  # Centrar el título
+        y=0.98,  # Ajustar posición vertical hacia arriba para dejar espacio para la descripción
+        xanchor='center',
+        yanchor='top',
+        font=dict(size=24, color='black'),
+        pad=dict(b=10, t=10)  # Espaciado alrededor del título
+    ),
+    yaxis=dict(title='Provincia', automargin=True, categoryorder='total ascending'),
+    xaxis=dict(title='Porcentaje', range=[-100, 100], tickvals=[-80, -60, -40, -20, 0, 20, 40, 60, 80],
+               ticktext=['80%', '60%', '40%', '20%', '0%', '20%', '40%', '60%', '80%']),
+    barmode='relative',
+    bargap=0.15,
+    bargroupgap=0.1,
+    width=1550,
+    height=1000,
+    showlegend=True,
+    margin=dict(l=100, r=100, t=150, b=150),  # Aumentar el margen inferior para asegurar espacio para el autor
+    annotations=[
+        # Anotación para la descripción debajo del título
+        dict(
+            x=0.5,
+            y=1.12,  # Posición ajustada para la descripción
+            xref="paper",
+            yref="paper",
+            text="Esta gráfica muestra el sostenimiento de las instituciones educativas por provincia.",
+            showarrow=False,
+            align="center",
+            font=dict(size=16),
+            bgcolor="rgba(255, 255, 255, 0.7)",  # Fondo semitransparente para mejorar la legibilidad
+            borderpad=4,  # Espaciado alrededor del texto
+            borderwidth=1,  # Ancho del borde
+            bordercolor="gray",  # Color del borde
+        ),
+        # Anotación para el autor en la parte baja del gráfico
+        dict(
+            x=0.5,
+            y=-0.15,  # Ajustar para posicionar correctamente en la parte baja
+            xref="paper",
+            yref="paper",
+            text="Autor: Mauricio Viera | Fuente: MINEDUC - Ecuador",  # Asegúrate de reemplazar 'Tu Nombre Aquí' con el nombre real del autor
+            showarrow=False,
+            align="center",
+            font=dict(size=12),
+            bgcolor="rgba(255, 255, 255, 0.7)",  # Opcional: Fondo semitransparente para mejorar la legibilidad
+            borderpad=4,  # Opcional: Espaciado alrededor del texto
+            borderwidth=1,  # Opcional: Ancho del borde
+            bordercolor="gray",  # Opcional: Color del borde
+        )
+    ]
+)
+
+# Ajustar el tamaño de las etiquetas de las barras
+fig.update_traces(textfont=dict(size=60))
+```
+
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b>Presentar una comparación visual del soporte institucional educativo en diferentes provincias de Ecuador, desglosado por tipo de institución (fiscal, fisco-misional, municipal y particular).
+
+También se busca destacar diferencias y patrones en la distribución de recursos o gestión educativa a lo largo de las provincias. <br>
+
+
+<b>¿Qué espera la audiencia?</b> Se espera que se pueda comprender la distribución del soporte a las instituciones educativas por provincia y tipo. Podrán buscar identificar provincias con mayor necesidad de soporte en ciertos tipos de instituciones o para evaluar dónde se están centrando los esfuerzos gubernamentales y privados.<br>
+
+El mensaje principal del gráfico es mostrar la disparidad o la equidad en el soporte institucional a nivel provincial. Los colores diferenciados y las barras proporcionales permiten una comparación rápida de las diferentes provincias y cómo se compara el soporte entre los tipos de instituciones educativas.<br>
+
+La herramienta utilizada es Python y la librería Plotly, por su capacidad para mostrar claramente las proporciones relativas de diferentes categorías dentro de un todo y porque es útil para mostrar cómo se compone cada provincia en términos de tipo de soporte educativo.<br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: 
+<a href=https://chart-studio.plotly.com/~MauricioViera95/78/#/>https://chart-studio.plotly.com/~MauricioViera95/78/#/</a>
+
+</div>
+```
+### 6. data day: OECD
+
+```{=html}
+<div style = "text-align:justify";>
+
+Para este día en específico se han utilizado los datos de la Organisation for Economic Co-operation and Development [OECD] (2024). Se ha propuesto visualizar el cambio de la cobertura terrestre, de manera que, se hace énfasis en la pérdida de vegetación en los países miembros de esta organización. <br>
+
+La visualización parece dirigida a un público interesado en temas medioambientales y de desarrollo sostenible, incluyendo formuladores de políticas, investigadores ambientales, educadores, y el público general consciente del cambio climático. Específicamente, podría interesar a miembros o seguidores de la Organización para la Cooperación y el Desarrollo Económicos (OCDE), así como a organismos de conservación de la biodiversidad y sostenibilidad. Por lo tanto, al ser de un carácter global se propone que el gráfico sea en idioma inglés.<br>
+
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Mostrar el cambio en la cobertura de tierra en los países de la OCDE, de manera que, se destaque la pérdida de vegetación desde 2004. Se usa la pérdida de vegetación natural y semi-natural como un indicador de la presión sobre la biodiversidad y los ecosistemas, lo que proporciona una perspectiva clara sobre un tema ambiental crucial.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia probablemente espera obtener una comprensión rápida de las tendencias en la pérdida de vegetación entre los países de la OCDE. Quieren saber qué países han experimentado cambios significativos en la cobertura terrestre, lo que podría servir como un indicador indirecto del estado y la presión sobre sus ecosistemas naturales.<br>
+
+El mensaje que el gráfico busca transmitir es la importancia y la urgencia de reconocer y actuar sobre la pérdida de vegetación, que es crítica para la biodiversidad y la salud de los ecosistemas. Resalta visualmente el porcentaje de pérdida de vegetación por país, con el objetivo de generar conciencia y posiblemente motivar medidas de conservación o políticas de uso de la tierra más sostenibles.
+<br><br>
+
+</div>
+```
+<iframe title="Land Cover change - OECD Countries" aria-label="Map" id="datawrapper-chart-2kJST" src="https://datawrapper.dwcdn.net/2kJST/3/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="558" data-external="1">
+
+</iframe>
+
+```{=html}
+<script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
+</script>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+La herramienta es Datawrapper, por su facilidad de uso, la presentación efectiva de datos geográficos y su capacidad para integrarse en plataformas web, lo que facilita la divulgación de la información a una audiencia amplia.
+
+</div>
+```
+## Distributions
+
+![](IMG_TEXTO/distribuciones.jpg){fig-align="center" width="275"}
+
+-   Extracto del gráfico "¿Qué gráfico elegir?**"** compartido en recursos y materiales.
+
+### 7. hazards
+
+```{=html}
+<div style = "text-align:justify";>
+
+Para esta nueva temática, se propone analizar la contaminación de aire en la ciudad de Quito - Ecuador. Los datos son obtenidos por la monitorización realizada por la Secretaría de Ambiente de Quito (2024). <br>
+
+Por lo tanto, se orienta la gráfica hacia un público que tiene un interés en la calidad del aire y temas ambientales, como científicos ambientales, profesionales de la salud pública, formuladores de políticas y posiblemente el público en general preocupado por la contaminación y sus efectos.
+
+</div>
+```
+[![](IMG_TEXTO/GRAFICO7.jpg){fig-align="center"}](https://www.eluniverso.com/noticias/ecuador/quito-clima-1-enero-2024-quema-anos-viejos-nota/)
+
+Fuente: Diario El Universo - Ecuador (2024).
+
+```{=html}
+
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Ilustrar las tendencias y variaciones en los niveles de partículas finas (PM2.5) en el aire de Quito a lo largo del tiempo. Se busca mostrar no sólo valores típicos (medianas y cuartiles), sino también la distribución completa de los datos, incluyendo posibles valores atípicos.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera una representación clara de la situación de la calidad del aire a lo largo de varios años para evaluar si hay una tendencia de mejora, deterioro o estabilidad en la contaminación atmosférica. Además, pueden estar buscando datos detallados que les ayuden a entender la variabilidad diaria o estacional de la contaminación del aire.<br>
+
+El mensaje clave es un resumen visual de la situación de la contaminación por PM2.5 en el centro de Quito, lo que ofrece una perspectiva longitudinal. La elección de colores distintos para cada año ayuda a diferenciar rápidamente entre los distintos conjuntos de datos, y las formas de los violines reflejan la densidad de los datos, mostrando dónde se concentran más las mediciones.
+<br><br>
+
+</div>
+```
+![](IMG_TEXTO/DIA_7.jpg){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+
+La herramienta elegida es R, es ideal para este tipo de análisis estadístico debido a su robustez y la disponibilidad de paquetes como ggplot2, que permite crear este tipo de gráfico avanzado.
+
+</div>
+```
+### 8. circular
+
+```{=html}
+<div style = "text-align:justify";>
+
+Para realizar este tipo de gráfico, se procedió a utilizar los mismos datos de contaminación del aire en Quito, por lo tanto, la audiencia es la misma.
+
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b>Comunicar la variabilidad estacional de los niveles de contaminantes en el aire en Quito. Se busca ilustrar a través de figuras circulares cómo estos contaminantes fluctúan a lo largo de los meses del año, proporcionando información valiosa sobre los períodos de mayor o menor calidad del aire.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia esperaría discernir patrones estacionales o tendencias en los niveles de contaminación del aire y obtener una comprensión visual rápida de cuándo se presentan los niveles más altos de contaminantes, lo cual es crucial para la salud pública y la planificación ambiental.<br>
+
+El mensaje principal del gráfico es la representación clara y directa de la distribución temporal de contaminantes atmosféricos. Cada gráfico polar resalta un contaminante diferente, lo que permite a la audiencia comparar los patrones entre ellos. El uso de colores distintivos para cada contaminante mejora la interpretación y comparación visual.
+<br><br>
+
+</div>
+```
+![](IMG_TEXTO/DIA_8.png){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+
+La herramienta utiliza es Python con la librería Plotly, el diseño aprovecha la naturaleza cíclica de los datos a lo largo del tiempo, donde el ángulo representa los meses del año y el radio representa la magnitud de la concentración del contaminante. Esta disposición aprovecha nuestra percepción natural de los ciclos para mapear la temporalidad y facilitar la identificación de los picos y valles en los datos de contaminación. <br>
+A continuación se comparten los gráficos interactivos para cada contaminante:<br>
+- PM 2.5<br>
+<a href=https://chart-studio.plotly.com/~MauricioViera95/85/#/>https://chart-studio.plotly.com/~MauricioViera95/85/#/</a> <br>
+- PM 10<br>
+<a href=https://chart-studio.plotly.com/~MauricioViera95/87/#/>https://chart-studio.plotly.com/~MauricioViera95/87/#/</a> <br>
+- O3<br>
+<a href=https://chart-studio.plotly.com/~MauricioViera95/91/#/>https://chart-studio.plotly.com/~MauricioViera95/91/#/</a> <br>
+- NO2 <br>
+<a href=https://chart-studio.plotly.com/~MauricioViera95/93/#/>https://chart-studio.plotly.com/~MauricioViera95/93/#/</a> <br>
+
+</div>
+```
+### 9. major/minor
+
+![](IMG_TEXTO/SIPA.jpg){style="float:right;" width="103" height="87"}
+
+Para realizar este tipo de gráfico, se propuso utilizar información del Ministerio de Agricultura y Ganadería del Ecuador, específicamente del Sistema de Información Pública Agropecuaria del Ecuador \[SIPA\] (2024).
+
+```{=html}
+<div style = "text-align:justify";>
+La visualización está dirigida a personas interesadas en la agricultura y el uso de la tierra en Pichincha, lo que podría incluir a agricultores, investigadores, formuladores de políticas, y también al personal de ministerios relacionados con la agricultura y la gestión del territorio. <br>
+
+Se muestra la distribución de cifras territoriales en cuanto al uso del suelo de la provincia de Pichincha – Ecuador. Se hace énfasis en el mayor y menor uso del territorio.
+
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b>Presentar una visión clara del uso del suelo y la producción agrícola en la provincia de Pichincha, de manera que, se destaquen los cultivos con mayor y menor superficie, así como comparando la producción agrícola de Pichincha con otras provincias a nivel nacional.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera obtener información precisa y comprensible sobre la distribución del uso del suelo en la agricultura de Pichincha y cómo esto se traduce en producción agrícola. Están buscando discernir rápidamente cuáles son los cultivos más y menos prevalentes y cómo la provincia se compara con otras regiones del país en términos de producción.<br>
+
+El mensaje que transmite el dashboard es una representación resumida y enfocada del estado actual de la agricultura en Pichincha, proporcionando datos clave para entender el panorama agrícola. Se enfoca en destacar datos relevantes que pueden ser importantes para la toma de decisiones o para la comprensión de la economía agrícola local.
+<br><br>
+
+</div>
+```
+![](IMG_TEXTO/GRAFICO_9.png){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada es Power BI, el diseño utiliza gráficos de barras y tablas para mostrar la información de una manera que es fácilmente comprensible a primera vista. La disposición de los elementos permite una comparación rápida entre diferentes tipos de uso del suelo y cultivos, así como la producción entre provincias. Cada gráfico tiene una leyenda o título que explica qué datos están siendo presentados, y la inclusión de fotografías de los cultivos agrega un elemento visual que mejora la identificación y el interés. 
+
+</div>
+```
+### 10. physical
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta tématica se ha procedido a visualizar la distribución de la obesidad en cada estado de los Estados Unidos. Los datos fueron obtenidos de DATA.GOV (2024b)<br>
+
+La audiencia objetivo de esta visualización incluye profesionales de la salud pública, investigadores, responsables de políticas sanitarias, y posiblemente el público general interesado en cuestiones de salud y bienestar. También podría interesar a organizaciones que se ocupan de la nutrición y la salud preventiva.
+
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b>Proporcionar una representación geoespacial de las tasas de obesidad a lo largo de Estados Unidos para identificar patrones geográficos en la prevalencia de la obesidad. 
+Esto puede ser útil para señalar las áreas que pueden requerir atención en términos de recursos de salud pública y programas de intervención.<br>
+
+
+<b>¿Qué espera la audiencia?</b>La audiencia esperaría discernir tendencias geográficas y regionales en las tasas de obesidad para comprender mejor cómo varía la obesidad en el país. También esperarían que la visualización revelara áreas de alta y baja prevalencia, proporcionando una base para el análisis y la discusión sobre las causas y posibles soluciones.<br>
+
+El mensaje clave es presentar una perspectiva clara y visual de las variaciones en la prevalencia de la obesidad por región, lo que podría influir en las estrategias de salud pública y en el destino de los recursos para combatir la obesidad.
+<br><br>
+
+</div>
+```
+![](IMG_TEXTO/GRAFICO_10.jpeg){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>Se eligió una herramienta basada en R (ggplot2 y sf) por su capacidad para manejar datos geoespaciales complejos y crear visualizaciones detalladas y personalizables. El diseño utiliza un esquema de color intuitivo que va del azul al rojo para representar un rango desde tasas bajas a altas de obesidad, permitiendo que los espectadores identifiquen rápidamente áreas de interés. Se eligió utilizar una temática de "Lego" para obtener un mapa poco convencional.
+</div>
+```
+### 11. mobile-friendly
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta tématica se ha decidido dar a conocer la distribución de la cantidad de dispositivos que ha lanzado una marca en el mercado, además de resaltar la distribución del sistema operativo. Los datos fueron obtenidos de Kaggle por parte de Prasad (2024).<br>
+
+El gráfico está dirigido principalmente a profesionales y analistas en el sector de la tecnología y dispositivos móviles, incluyendo fabricantes, comercializadores, desarrolladores de aplicaciones, y quizás también a investigadores del mercado de consumo electrónico. También podría interesar a entusiastas de la tecnología y consumidores que desean comprender mejor el mercado de dispositivos móviles.
+
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Proporcionar una comparativa visual de la distribución de la cantidad de modelos de dispositivos disponibles por marca, destacando la división entre diferentes sistemas operativos. 
+Esto puede ser útil para ilustrar la diversidad y rango de productos ofrecidos por cada fabricante y para mostrar cuál de los sistemas operativos es predominante en su oferta.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera obtener una visión clara de qué marcas ofrecen más variedad de modelos y cómo se distribuyen estos entre los sistemas operativos Android, iOS y otros. Los profesionales del sector podrían buscar esta información para analizar la competencia o para comprender mejor el ecosistema de dispositivos móviles.<br>
+
+El mensaje principal es que existe una variación significativa en la cantidad de modelos ofrecidos por diferentes marcas y que Android es el sistema operativo predominante en la mayoría de las marcas, excepto Apple. Esta información puede ser importante para comprender la estrategia de mercado de las marcas y para evaluar la disponibilidad de opciones para los consumidores.
+<br><br>
+
+</div>
+```
+```{python}
+#| label: GRAFICO11_CARGA_DATOS
+#| warning: false
+#| echo: false
+#| 
+
+import pandas as pd
+import plotly.express as px
+
+# Suponiendo que ya has cargado tu dataset como 'data'
+data = pd.read_csv('DATOS/52features.csv', sep=';')
+
+# Preparar los datos para el gráfico
+# Es posible que necesites ajustar los nombres de las columnas según tu dataset
+data_grouped = data.groupby(['brand', 'operating_system']).size().reset_index(name='Count')
+```
+
+```{python}
+#| label: GRAFICO11_FIGURA
+#| warning: false
+#| echo: false
+#| 
+
+import pandas as pd
+import plotly.express as px
+
+# Asume que 'data' ya está cargado y preprocesado
+
+# Función ajustada para manejar valores nulos y agrupar sistemas operativos
+def group_os(os_name):
+    if pd.isnull(os_name):
+        return 'Otros'  # Maneja los valores nulos como 'Otros'
+    os_name = os_name.lower()  # Asegura que el nombre esté en minúsculas
+    if 'android' in os_name:
+        return 'Android'
+    elif 'ios' in os_name:
+        return 'iOS'
+    else:
+        return 'Otros'  # Agrupa otros sistemas operativos en 'Otros'
+
+# Aplica la función para crear una nueva columna con los grupos de SO
+data['os_group'] = data['operating_system'].apply(group_os)
+
+# Agrupa los datos por marca y grupo de SO, y cuenta las ocurrencias
+data_grouped = data.groupby(['brand', 'os_group']).size().reset_index(name='Count')
+
+# Filtra para dejar solo las filas con 'Count' mayor a 50
+data_grouped = data_grouped[data_grouped['Count'] > 50]
+
+# Calcular la suma total de dispositivos por marca para ordenar
+total_count_by_brand = data_grouped.groupby('brand')['Count'].sum().reset_index()
+total_count_by_brand = total_count_by_brand.sort_values(by='Count', ascending=False)
+
+# Ordenar los datos agrupados según el orden descendente de marcas
+data_grouped['brand'] = pd.Categorical(data_grouped['brand'], categories=total_count_by_brand['brand'])
+data_grouped = data_grouped.sort_values('brand')
+
+# Crea el gráfico de barras apiladas
+fig = px.bar(data_grouped, x='brand', y='Count',
+             color='os_group',  # Diferencia las barras por grupo de SO
+             title='Distribución de la cantidad de modelos de dispositivos por marca (Android, iOS, Otros)<br><sub>Una visión general de la distribución de modelos y sistemas operativos de diferentes marcas.</sub>',
+             text='Count',  # Muestra la cuenta en las barras
+             category_orders={'brand': total_count_by_brand['brand']})  # Ordena las marcas
+
+# Mejoras para dispositivos móviles y ajustes de títulos de ejes
+fig.update_layout(
+    xaxis_tickangle=-45,
+    plot_bgcolor='white',
+    margin=dict(l=20, r=20, t=60, b=120),  # Ajusta márgenes para mejor visualización en móviles
+    legend_title_text='Sistema Operativo',
+    xaxis_title="Marca",  # Título personalizado para el eje X
+    yaxis_title="Cantidad de Dispositivos",  # Título personalizado para el eje Y
+    annotations=[
+        dict(
+            x=0.5,
+            y=-0.35,
+            showarrow=False,
+            text="Autor: Mauricio Viera | Fuente: Mobile Phone feature Dataset.",
+            xref="paper",
+            yref="paper",
+            align="center"
+        )
+    ]
+)
+
+# Ajusta el tamaño del texto para mejorar legibilidad en dispositivos móviles
+fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta elegida es Python con la librería Plotly. El diseño del gráfico con barras diferenciadas por color indica claramente la cantidad de dispositivos por marca y por sistema operativo. La elección de una paleta de colores distintiva facilita la distinción entre Android, iOS y otros sistemas operativos. La inclusión de etiquetas de datos directamente en las barras proporciona una referencia rápida sin necesidad de consultar una leyenda. <br>
+
+Es importante mencionar que se podría mejorar el gráfico al orientar las barras de manera horizonal.<br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/95/#/">https://chart-studio.plotly.com/~MauricioViera95/95/#/</a>
+
+</div>
+```
+### 12. theme day: Reuters Graphics
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se ha decidido adoptar como fuente de inspiración un gráfico de Reuters, especificamente uno que emplea datos geoespaciales "Deadly earthquake hits Afghanistan" (<a href="https://www.reuters.com/graphics/AFGHANISTAN-QUAKE/jnpwwbxyqpw/">https://www.reuters.com/graphics/AFGHANISTAN-QUAKE/jnpwwbxyqpw/</a>). Además de utilizar la paleta de colores para datos secuenciales "mangoFujiApple" y la fuente de texto a la familia "SANS-SERIF". Los datos son utilizados a partir de la librería Geemap de Python, específicamente de la NOAA<br><br><br>
+</div>
+```
+![](IMG_TEXTO/reuters.jpg){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+La visualización está dirigida a meteorólogos, climatólogos, profesionales relacionados con la planificación ambiental y de recursos naturales, y puede que también al público general interesado en patrones climáticos y fenómenos meteorológicos.<br>
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Presentar la distribución de datos de temperatura en un formato visual y fácilmente interpretable que resalte las variaciones térmicas a lo largo de un periodo específico. 
+Se busca proporcionar una herramienta que permita a los espectadores identificar patrones, extremos o anomalías en la temperatura que podrían ser relevantes para la investigación climática o la planificación de respuesta a emergencias.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera una representación clara y precisa de las fluctuaciones de temperatura a través del tiempo y el espacio. Los profesionales en campos relacionados con la meteorología podrían estar buscando patrones que indiquen fenómenos climáticos, mientras que el público general podría estar interesado en entender cómo las temperaturas varían a través de las estaciones o en respuesta a eventos climáticos más amplios.<br>
+
+El mensaje principal es una representación visual de la distribución de la temperatura en el tiempo a lo largo de la región de América del Sur, destacando la variabilidad térmica. La escala de colores proporciona una interpretación inmediata de las zonas más cálidas y frías.
+<br><br>
+
+</div>
+```
+![](IMG_TEXTO/output.gif){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada es Python mediante la libreria Geemap. La visualización utiliza una paleta de "Reuters graphics", específicamente la "mangoFujiApple", la cual permite obtener colores térmicos para representar la temperatura, que es una convención común en la visualización de datos climáticos, haciendo que sea intuitiva para los espectadores. La inclusión de la barra de color facilita la correlación de los colores con rangos de temperatura específicos. Los logotipos de NOAA y VIU agregan credibilidad y contexto institucional, y el texto en la parte inferior proporciona información esencial sobre la naturaleza y el alcance de los datos representados.<br>
+
+A continuación se comparte un enlace con la animación:<br>
+<a href=https://drive.google.com/file/d/1skeOzNLb1McVVroEI0YRuYKMLGNaI7rt/view?usp=drive_link>https://drive.google.com/file/d/1skeOzNLb1McVVroEI0YRuYKMLGNaI7rt/view?usp=drive_link</a> <br>
+
+</div>
+```
+## Relationships
+
+![](IMG_TEXTO/relaciones.jpg){fig-align="center"}
+
+-   Extracto del gráfico "¿Qué gráfico elegir?**"** compartido en recursos y materiales.
+
+### 13. family
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se ha propuesto utilizar datos de aves endémicas para apreciar la relación entre cada la especie, el orden y la familia. Los datos fueron obtenidos de Bioweb (2024)
+(<a href="https://bioweb.bio/faunaweb/avesweb/DiversidadBiogeografia/">https://bioweb.bio/faunaweb/avesweb/DiversidadBiogeografia/</a>). 
+
+Este gráfico está dirigido principalmente a biólogos, ornitólogos, ecologistas, conservacionistas y educadores, así como a personas interesadas en la biodiversidad y la evolución de las aves en Ecuador. También puede interesar a aquellos que trabajan en áreas de preservación de hábitats y estudios de biodiversidad.
+<br><br><br>
+</div>
+```
+![](IMG_TEXTO/AVES.jpg){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Presentar las relaciones evolutivas entre las aves endémicas de Ecuador, destacando cómo diferentes especies están conectadas a través de su ancestro común. El gráfico busca proporcionar una representación visual de la diversidad de aves dentro del contexto filogenético, enfatizando tanto la separación taxonómica como las conexiones entre familias y órdenes.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera entender las relaciones familiares y de orden entre las aves endémicas de Ecuador. Desean una representación que sea científicamente precisa, informativa y fácil de interpretar. Es probable que busquen identificar patrones de diversificación entre las aves y obtener una comprensión más profunda de su evolución y clasificación.<br>
+El mensaje principal del gráfico es la complejidad y la riqueza de las relaciones filogenéticas entre las aves endémicas de Ecuador. Muestra visualmente cómo las especies están clasificadas y relacionadas, resaltando la importancia de la conservación de la biodiversidad y la necesidad de proteger los hábitats únicos que dan origen a esta diversidad.
+<br><br>
+
+</div>
+```
+![](IMG_TEXTO/DIA_13.png){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>La herramienta elegida fue Python con la librería networkx, el diseño emplea un esquema de colores y formas para diferenciar entre órdenes, familias y especies, lo cual ayuda a navegar visualmente a través de la complejidad de las relaciones. Los círculos concéntricos representan las diferentes categorías taxonómicas y su tamaño proporciona una indicación del número de especies o de la diversidad dentro de cada grupo. 
+</div>
+```
+### 14. heatmap
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se ha propuesto utilizar Spotify API por parte de Hamed (2022), para poder representar la relación que existe entre las características musicales y la popularidad de una canción. Este gráfico es una mejora del utilizado en una actividad de Estadística Avanzada. 
+
+Este gráfico está dirigido a profesionales de la industria musical, como productores, músicos, y analistas de mercado, así como a aficionados de la música y usuarios de plataformas de streaming que estén interesados en entender qué características influyen en la popularidad de las canciones.
+<br><br><br>
+</div>
+```
+![](IMG_TEXTO/spotify.jpg){fig-align="center" width="93"}
+
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Proporcionar una representación visual de cómo las diferentes características musicales se relacionan con niveles de popularidad de las canciones. 
+Se propone identificar patrones o tendencias que puedan indicar qué atributos son más comunes en canciones populares, lo que podría informar la toma de decisiones en la producción musical o marketing.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera insights sobre qué atributos pueden hacer que una canción sea más popular. Los profesionales de la música podrían usar esta información para orientar la creación o promoción de música, mientras que los aficionados y usuarios podrían estar interesados simplemente por curiosidad o para descubrir nuevas canciones que coincidan con sus preferencias.<br>
+
+El mensaje principal es que ciertas características musicales como 'danceability', 'energy', y 'valence' tienen correlaciones variables con la popularidad de una canción. Algunas características pueden tener una fuerte asociación con la popularidad alta, mientras que otras no.
+<br><br>
+
+</div>
+```
+```{python}
+#| label: GRAFICO14_DATOS
+#| warning: false
+#| echo: false
+#| 
+
+import plotly.express as px
+import pandas as pd
+
+data = pd.read_csv('DATOS/song_data.csv')
+```
+
+```{python}
+#| label: GRAFICO14_FIGURA
+#| warning: false
+#| echo: false
+
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import KBinsDiscretizer
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Asegurándonos de que el DataFrame 'data' esté cargado correctamente
+# data = pd.read_csv('ruta/a/tu/archivo.csv') # Descomenta y ajusta la ruta si es necesario
+
+# Crear la columna 'popularity_range' usando cuartiles
+est = KBinsDiscretizer(n_bins=4, encode='ordinal', strategy='quantile')
+data['popularity_range'] = est.fit_transform(data[['song_popularity']]).flatten()
+
+# Calcular promedios de características musicales por rango de popularidad
+features = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness', 'speechiness', 'tempo', 'audio_valence']
+average_features_per_popularity = data.groupby('popularity_range')[features].mean()
+
+# Opcional: Normalizar los datos para que estén en la misma escala
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+scaled_features = scaler.fit_transform(average_features_per_popularity)
+scaled_features_df = pd.DataFrame(scaled_features, columns=features, index=['Baja', 'Media-baja', 'Media-alta', 'Alta'])
+
+# Crear el heatmap usando seaborn
+plt.figure(figsize=(9, 7))
+ax = sns.heatmap(scaled_features_df, annot=True, fmt=".2f", cmap="cividis", cbar_kws={'label': 'Promedio normalizado'},
+                 linecolor='white', linewidths=1)
+plt.title('Análisis de la Popularidad de Canciones Basado en sus Características Musicales', fontsize=14, fontweight='bold', y=1.2)
+plt.xlabel('Características Musicales')
+plt.ylabel('Rango de Popularidad')
+plt.xticks(rotation=45, ha="right")
+
+# Añadir descripción bajo el título y autor y fuente de datos
+plt.gcf().text(0.5, 0.8, 'Este heatmap muestra cómo varían las características musicales con la popularidad.', ha='center', fontsize=12)
+plt.gcf().text(0.45, 0.015, 'Fuente de datos: Spotify API', ha='center', fontsize=9)
+plt.gcf().text(0.45, 0.035, 'Autor: Mauricio Viera', ha='center', fontsize=9)
+
+plt.tight_layout(rect=[0, 0.04, 1, 0.96])  # Ajustar el layout para dejar espacio para el texto en la parte inferior
+plt.show()
+
+
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada para crear este gráfico es Python, debido a su capacidad para manejar y visualizar datos de manera interactiva y estéticamente agradable. El diseño utiliza un esquema de color para representar el promedio normalizado de las características musicales con relación a la popularidad. Cada celda del heatmap tiene un color que varía según la magnitud del promedio, proporcionando una comparación visual inmediata entre diferentes combinaciones de popularidad y características.  
+</div>
+```
+### 15. historical
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se ha propuesto utilizar datos de Macrotrends (2024) para mostrar la relación entre la tasa de crímenes por cada 100 mil habitantes en Japón y el cambio porcentual anual en dicha medida, en un rango de 31 años. 
+
+Este gráfico está dirigido a criminólogos, responsables de la formulación de políticas, analistas de seguridad pública, así como a cualquier persona interesada en las tendencias de la delincuencia en Japón. La información es relevante para aquellos que buscan entender la evolución de la seguridad en la región a lo largo del tiempo.
+<br><br><br>
+</div>
+```
+![](IMG_TEXTO/macrotrends.jpg){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Proporcionar una visualización clara de la tasa de delitos en Japón a lo largo de varios años y cómo se relaciona su cambio año tras año. Se busca destacar tanto el valor absoluto de la tasa de delitos como las tendencias en su cambio, permitiendo así que los observadores identifiquen posibles patrones o anomalías en los datos.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera obtener una visión clara y precisa de la tasa de delitos y de cómo ha fluctuado a lo largo de los años. Los responsables políticos y los analistas podrían buscar información para orientar las estrategias de prevención y respuesta a la delincuencia, mientras que el público en general puede estar interesado en la seguridad y la calidad de vida en la región.<br>
+
+El mensaje clave es que la tasa de delitos por 100 mil habitantes en Japón varía de año en año, y el gráfico proporciona un medio para visualizar rápidamente estos cambios. La línea representa la tasa de delitos y muestra la tendencia general, mientras que las barras indican el cambio anual, con colores diferenciando los aumentos (verde) de las disminuciones (rojo).
+<br><br>
+
+</div>
+```
+```{python}
+#| label: GRAFICO15_DATOS
+#| warning: false
+#| echo: false
+import pandas as pd
+import plotly.express as px
+import pandas as pd
+import plotly.graph_objs as go
+from plotly.subplots import make_subplots
+
+# Cargando el dataset
+file_path = 'DATOS/crimen_jp.csv'  # Asegúrate de ajustar esta ruta al lugar donde guardaste el archivo
+crimen_data = pd.read_csv(file_path)
+crimen_data.head(5)
+
+# Limpia y prepara los datos
+# crimen_data = crimen_data.iloc[:, :-1]  # Elimina la última columna si es innecesaria
+crimen_data.columns = ['Date', 'Per_100K_Population', 'Annual_Percent_Change']
+crimen_data['Date'] = pd.to_datetime(crimen_data['Date'])
+```
+
+```{python}
+#| label: GRAFICO15_FIGURA
+#| warning: false
+#| echo: false
+import plotly.graph_objects as go
+import pandas as pd
+
+# Suponiendo que crimen_data es tu DataFrame
+# crimen_data = pd.read_csv('tu_archivo.csv')  # Asegúrate de cargar tus datos aquí
+crimen_data['Date'] = pd.to_datetime(crimen_data['Date'])  # Convierte a datetime si no lo está
+
+# Colores para las barras con transparencia
+bar_colors_transparent = ['rgba(0,255,0,0.6)' if x > 0 else 'rgba(255,0,0,0.6)' for x in crimen_data['Annual_Percent_Change']]
+
+# Creación del gráfico combinado
+fig = go.Figure()
+
+# Serie de línea para 'Per 100K Population'
+fig.add_trace(
+    go.Scatter(
+        x=crimen_data['Date'],
+        y=crimen_data['Per_100K_Population'],
+        mode='lines+markers',
+        name='Per 100K Population',
+        yaxis='y2',
+        line=dict(width=3),
+        marker=dict(size=7, line=dict(width=2))
+    )
+)
+
+# Serie de barras para 'Annual Percent Change'
+fig.add_trace(
+    go.Bar(
+        x=crimen_data['Date'],
+        y=crimen_data['Annual_Percent_Change'],
+        name='Annual % Change',
+        marker=dict(color=bar_colors_transparent)
+    )
+)
+
+# Configuraciones adicionales para una apariencia más pulida
+fig.update_layout(
+    barmode='overlay',
+    title={
+        'text': 'Crime Rate Per 100K Population and Annual Percentage Change in Japan<br><sup>Data visualized from 1990 to 2021 highlighting crime rate trends and year-over-year changes.</sup>',
+        'y':0.88,  # Ajustar para dar más espacio al título y descripción en la parte superior
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'
+    },
+    xaxis=dict(
+        title='Year',
+        tickangle=-90,
+        type='date',
+        tickmode='array',
+        tickvals=crimen_data['Date'],
+        ticktext=[date.strftime('%Y') for date in crimen_data['Date']],
+        showline=True,
+        linewidth=2,
+        linecolor='black'
+    ),
+    yaxis=dict(
+        title='Annual % Change',
+        titlefont=dict(color='rgba(255,0,0,0.8)'),
+        tickfont=dict(color='rgba(255,0,0,0.8)'),
+        showline=True,
+        linewidth=2,
+        linecolor='black'
+    ),
+    yaxis2=dict(
+        title='Per 100K Population',
+        titlefont=dict(color='rgba(0,0,255,0.8)'),
+        tickfont=dict(color='rgba(0,0,255,0.8)'),
+        overlaying='y',
+        side='right',
+        showline=True,
+        linewidth=2,
+        linecolor='black'
+    ),
+    template='plotly_white',
+    hovermode='x unified',
+    margin=dict(l=40, r=40, t=120, b=150)  # Ajustar los márgenes para equilibrar el espacio superior e inferior
+)
+
+# Agregar la descripción debajo del título y el nombre del autor en la parte inferior
+fig.add_annotation(
+    xref='paper', yref='paper', x=0.5, y=-0.25,  # Ajustar la posición Y negativa para mover el texto más abajo sin superposición
+    xanchor='center', yanchor='top',
+    text='Autor: Mauricio Viera<br>Data Source: macrotrends',
+    showarrow=False,
+    font=dict(size=12, color='grey')
+)
+```
+
+```{=html}
+<div style = "text-align:justify";>Se ha utilizado Python y Plotly debido a su poderosa capacidad para manejar grandes conjuntos de datos y crear visualizaciones interactivas y altamente personalizables. El diseño del gráfico es efectivo para presentar dos dimensiones de los datos simultáneamente: las barras ofrecen una comparación año a año del cambio en la tasa de delitos, y la línea muestra la tendencia general de la tasa de delitos a lo largo del tiempo..<br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/98/#/">https://chart-studio.plotly.com/~MauricioViera95/98/#/</a>
+
+</div>
+```
+### 16. weather
+
+```{=html}
+<div style = "text-align:justify";>
+Para la temática “weather”, en esta ocasión se presenta como varía la humedad diaria respecto a la temperatura promedio, en la ciudad de Los Ángeles. Se tiene como fuente al dataset de Historical Hourly Weather Data de Kaggle (Beniaguev, D. 2018):
+
+<a href="https://www.kaggle.com/datasets/selfishgene/historical-hourly-weather-data/data">https://www.kaggle.com/datasets/selfishgene/historical-hourly-weather-data/data</a>.
+
+Este gráfico está dirigido a meteorólogos, científicos del clima, profesionales del medio ambiente, así como a cualquier persona interesada en entender las tendencias climáticas y cómo la temperatura y la humedad están correlacionadas en Los Ángeles.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Visualizar y analizar la correlación entre la temperatura y la humedad y cómo esta relación puede cambiar con el tiempo. Estás buscando destacar cualquier patrón subyacente o tendencia temporal en los datos climáticos de la ciudad.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera discernir claramente cómo la humedad está relacionada con la temperatura y si existen tendencias distintas o patrones estacionales/anuales. Los especialistas del clima podrían usar esta información para hacer proyecciones o entender mejor el microclima de Los Ángeles, mientras que el público en general puede estar interesado en cómo el clima afecta su vida diaria y las condiciones ambientales de su ciudad.<br>
+
+El mensaje principal del gráfico es que existe una relación aparente entre la temperatura y la humedad en Los Ángeles que varía con el tiempo. La línea LOESS muestra una tendencia general más flexible basada en los datos locales, mientras que la línea polinómica sugiere una tendencia más suavizada y generalizada a lo largo del rango de datos.
+<br><br>
+
+</div>
+```
+![](IMG_TEXTO/DIA_16.jpeg){fig-align="left"}
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada es R, el diseño del gráfico es eficaz en mostrar una gran cantidad de datos de forma clara y concisa. Los puntos de datos individuales permiten observar la variabilidad diaria y las diferencias entre años, mientras que las líneas de tendencia proporcionan una interpretación subyacente de los datos. La codificación por colores por año ayuda a identificar si hay cambios en la relación entre la humedad y la temperatura a lo largo del tiempo.
+</div>
+```
+### 17. networks
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se ha propuesto utilizar los datos del crimen en New York, utilizados anteriormente. En esta ocasión se muestra la relación entre el arma usada, la raza del perpetrador y la circunstancia del crimen en New York.
+
+Este gráfico está dirigido a analistas de datos de crímenes, legisladores, fuerzas del orden y personas interesadas en la sociología y la criminología. Está diseñado para presentar la interconexión de múltiples variables en incidentes criminales.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Visualizar la compleja interacción entre las armas utilizadas en crímenes, las características demográficas de los perpetradores y las circunstancias en que se cometen estos crímenes. 
+Se pretende identificar patrones o tendencias en estos incidentes que podrían no ser inmediatamente evidentes sin esta representación visual.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera extraer insights significativos sobre los patrones de criminalidad y cómo estos pueden variar según la raza del perpetrador y el tipo de arma utilizada. Los responsables políticos pueden estar buscando fundamentos para medidas de control de armas o intervenciones dirigidas, mientras que los analistas pueden estar buscando correlaciones y causas subyacentes.<br>
+
+El mensaje principal es que existen distintas dinámicas en los crímenes que se correlacionan con la raza del perpetrador y el tipo de arma utilizada. Los nodos y las conexiones en el gráfico intentan ilustrar la frecuencia o la fuerza de estas relaciones. Por ejemplo, puede que haya una conexión destacada entre armas de fuego y ciertos tipos de crímenes o demografías.
+<br><br>
+
+</div>
+```
+![](IMG_TEXTO/DIA_17.png){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>La herramienta elegida fue Python con la librería networkx, el diseño emplea un esquema de colores diferenciado para representar los tipos de nodos (raza del perpetrador, arma utilizada, circunstancia del incidente), lo que facilita la identificación de cada categoría. Las líneas que conectan los nodos sugieren relaciones o correlaciones entre ellos. 
+</div>
+```
+### 18. data day: Asian Development Bank
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática propuesta se muestra la relación entre el financiamiento para mitigación y la adaptación al cambio climático obtenido de Asian Development Bank (2024).
+
+La visualización está claramente dirigida a partes interesadas involucradas en la financiación y gestión de proyectos de cambio climático, como analistas financieros, planificadores de proyectos, tomadores de decisiones en instituciones financieras y políticas, así como investigadores interesados en la sostenibilidad y el cambio climático.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Ilustrar cómo se correlacionan las inversiones en mitigación y adaptación al cambio climático con la percepción del impacto que el cambio climático tiene en los proyectos. 
+Se busca identificar si hay una tendencia en la asignación de fondos en relación con la gravedad del impacto del cambio climático.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera comprender la dinámica de financiamiento en respuesta al cambio climático y cómo esta financiación se relaciona con la evaluación del riesgo climático. Los responsables de la formulación de políticas y financiadores pueden buscar patrones en estos datos para informar decisiones estratégicas futuras. También pueden estar buscando justificaciones para el aumento de la financiación en ciertas áreas.<br>
+
+El mensaje principal es que existe una relación entre los montos destinados a la mitigación y la adaptación y el impacto percibido del cambio climático en los proyectos. El gráfico puede estar mostrando si proyectos con un impacto más alto del cambio climático reciben más fondos, lo que podría señalar una asignación de recursos consciente de los riesgos.
+</div>
+```
+```{python}
+#| label: GRAFICO18_DATOS
+#| warning: false
+#| echo: false
+
+import pandas as pd
+
+# Cargar datos
+data_path = 'DATOS/abd.csv'
+abd_data = pd.read_csv(data_path)
+```
+
+```{python}
+#| label: GRAFICO18_FIGURA
+#| warning: false
+#| echo: false
+
+import plotly.express as px
+import pandas as pd
+
+# Asegurarse de que las cantidades de financiamiento estén en formato numérico y manejar NaNs
+abd_data['Mitigation Finance ($ million)'] = pd.to_numeric(abd_data['Mitigation Finance ($ million)'], errors='coerce')
+abd_data['Adaptation Finance ($ million)'] = pd.to_numeric(abd_data['Adaptation Finance ($ million)'], errors='coerce')
+abd_data['Project Financing Amount ($ million)'] = pd.to_numeric(abd_data['Project Financing Amount ($ million)'], errors='coerce').fillna(1)  # Reemplaza NaNs con 1
+
+# Filtrar los datos para eliminar cualquier fila donde tanto el financiamiento de mitigación como de adaptación sean NaN
+filtered_data = abd_data.dropna(subset=['Mitigation Finance ($ million)', 'Adaptation Finance ($ million)'], how='all')
+
+# Crear el gráfico de dispersión
+fig = px.scatter(
+    filtered_data,
+    x='Mitigation Finance ($ million)',
+    y='Adaptation Finance ($ million)',
+    color='Climate Change Impact on the Project',
+    size='Project Financing Amount ($ million)',  # Ahora todos los valores son numéricos
+    hover_data=['Project Name', 'Country Code'],
+    title='<b>Relationship between Financing of Mitigation and Adaptation due to the Impact of Climate Change</b>',  # Título en negrita
+    labels={
+        'Mitigation Finance ($ million)': 'Mitigation Finance ($ million)',
+        'Adaptation Finance ($ million)': 'Adaptation Finance ($ million)',
+        'Climate Change Impact on the Project': 'Climate Change Impact on the Project'
+    },
+    color_discrete_sequence=px.colors.qualitative.Set2
+)
+
+# Mejorar la visualización con líneas de ejes y cuadrícula
+fig.update_layout(
+    plot_bgcolor='white',
+    font=dict(size=12),
+    xaxis=dict(showline=True, linewidth=2, linecolor='black', gridcolor='rgba(128,128,128,0.5)', griddash='dot'),
+    yaxis=dict(showline=True, linewidth=2, linecolor='black', gridcolor='rgba(128,128,128,0.5)', griddash='dot'),
+    title_font_size=15,  # Cambiar el tamaño de la fuente del título aquí
+    # Añadir descripción y fuente
+    margin=dict(t=150, l=100, r=100, b=120),
+    annotations=[
+        dict(
+            text='This graph shows how climate change mitigation and adaptation financing relates<br>to the perceived impact of climate change on projects financed by the Asian Development Bank.',
+            showarrow=False,
+            xref='paper',
+            yref='paper',
+            x=0.7,
+            y=1.09,
+            xanchor='center',
+            yanchor='top',
+            align='center'
+        ),
+        dict(
+            text='Author: Mauricio Viera - Source: Asian Development Bank',
+            showarrow=False,
+            xref='paper',
+            yref='paper',
+            x=0.5,
+            y=-0.14,
+            xanchor='center',
+            yanchor='top',
+            align='center'
+        )
+    ],
+    width=900,  # Ancho del gráfico en píxeles
+    height=600  # Altura del gráfico en píxeles
+)
+
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta elegida fue Python y Plotly, el diseño del gráfico utiliza un formato de burbujas con diferentes colores y tamaños para representar múltiples dimensiones de datos en un solo plano, lo que permite una interpretación rica y multifacética de la información. La inclusión de una leyenda ayuda a decodificar el significado de los colores, y la escala numérica proporciona una referencia clara para los montos de financiación. <br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/100/#/">https://chart-studio.plotly.com/~MauricioViera95/100/#/</a>
+
+</div>
+```
+## Timeseries
+
+![](IMG_TEXTO/timeseries.jpg){fig-align="center"}
+
+-   Extracto del gráfico "¿Qué gráfico elegir?**"** compartido en recursos y materiales.
+
+### 19. dinosaurs
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se propuso una serie temporal de la cantidad de dinosaurios descubiertos a lo largo del tiempo, los datos fueron obtenidos de The Paleobiology Database (2024).
+
+Este gráfico está dirigido a paleontólogos, educadores, estudiantes de ciencias de la tierra y al público en general interesado en la historia de la paleontología y los descubrimientos de dinosaurios.
+</div>
+```
+![](IMG_TEXTO/paleo.png){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Mostrar la frecuencia y la tendencia de los descubrimientos de dinosaurios a lo largo del tiempo, proporcionando una perspectiva histórica de la actividad en el campo de la paleontología. Deseas resaltar los picos o aumentos significativos en los descubrimientos que pueden estar vinculados a avances tecnológicos, nuevas expediciones o mayores intereses en ciertas eras.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera obtener una comprensión clara de cómo han cambiado los descubrimientos de dinosaurios a lo largo de los años. Es probable que estén buscando patrones o tendencias que puedan explicar el ritmo de los descubrimientos, como los efectos de nuevas tecnologías o la asignación de recursos a la investigación paleontológica.<br>
+
+El mensaje principal que transmite el gráfico es la progresión y las variaciones en el número de descubrimientos de dinosaurios a lo largo del tiempo. Las anotaciones de porcentaje podrían estar indicando la tasa de cambio o crecimiento en los descubrimientos en comparación con años anteriores.
+</div>
+```
+![](IMG_TEXTO/DIA_19.png){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>La herramienta elegida fue R y Plotly, el diseño del gráfico es intuitivo, con una línea de tiempo clara y un enfoque en la visualización de datos de series temporales. Los colores y las anotaciones mejoran la comprensión de los datos, mientras que la representación gráfica permite identificar rápidamente años de interés especial.  <br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/102/#/">https://chart-studio.plotly.com/~MauricioViera95/102/#/</a>
+
+</div>
+```
+### 20. correlation
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se muestra la correlación diaria entre humedad y temperatura en distintos años, correspondiente a la ciudad de Los Ángeles (Historical Hourly Weather Data).
+
+La audiencia objetivo son científicos y analistas del clima, meteorólogos, así como el público interesado en entender las tendencias climáticas. También puede ser relevante para educadores y estudiantes en el campo de las ciencias ambientales.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Ilustrar la relación entre dos variables meteorológicas importantes a lo largo de diferentes años en la ciudad de Los Ángeles. se trata de identificar si existe una correlación consistente entre la temperatura y la humedad y cómo esa correlación puede variar anualmente.<br>
+
+
+<b>¿Qué espera la audiencia?</b> Los espectadores esperan discernir patrones o tendencias en los datos, como si una mayor humedad tiende a coincidir con temperaturas más bajas o más altas y cómo esto podría fluctuar de un año a otro. Las tendencias anuales indicadas por las líneas de tendencia también podrían informar a la audiencia sobre posibles cambios en el clima local o la variabilidad año a año.<br>
+
+El mensaje principal es que la correlación entre la humedad y la temperatura puede observarse y variar cada año, como se ilustra con las líneas de tendencia. Los diferentes colores y marcas para cada año facilitan la comparación entre años.
+</div>
+```
+```{python}
+#| label: GRAFICO20_FIGURA
+#| warning: false
+#| echo: false
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.express as px
+
+# Cargar el dataset
+data = pd.read_csv('DATOS/la_weather_dataset.csv')
+data['datetime'] = pd.to_datetime(data['datetime'])
+data_clean = data.dropna(subset=['Humidity', 'Temperature'])
+
+# Convertir datos de hora en hora a datos diarios tomando el promedio de 'Humidity' y 'Temperature'
+data_daily = data_clean.resample('D', on='datetime').mean()
+
+# Extraer el año de la fecha para poder agrupar por año en los datos diarios
+data_daily['year'] = data_daily.index.year
+
+# Obtener la lista de años únicos en el dataset diario
+years = data_daily['year'].unique()
+
+# Preparar una grilla de gráficos de correlación para datos diarios
+rows = 2  # Ajustar según el número de años
+cols = (len(years) + 1) // rows
+subplot_titles = [f"Correlación {year}" for year in years]
+fig = make_subplots(rows=rows, cols=cols, subplot_titles=subplot_titles, vertical_spacing=0.15)
+
+# Añadir un scatter plot con línea de tendencia para cada año en los datos diarios
+for i, year in enumerate(years):
+    df_year = data_daily[data_daily['year'] == year]
+    row = (i // cols) + 1
+    col = (i % cols) + 1
+    # Usar plotly express para generar el scatter plot con línea de tendencia
+    scatter_with_trendline = px.scatter(df_year, x='Humidity', y='Temperature', trendline="ols")
+    # Extraer la línea de tendencia y los puntos de datos
+    trendline = scatter_with_trendline.data[1]
+    data_points = scatter_with_trendline.data[0]
+    # Añadir los puntos de datos y la línea de tendencia al subplot
+    fig.add_trace(go.Scatter(x=data_points.x, y=data_points.y, mode='markers', name=f'Year {year}'), row=row, col=col)
+    fig.add_trace(go.Scatter(x=trendline.x, y=trendline.y, mode='lines', name=f'Tendencia {year}'), row=row, col=col)
+
+# Ajustes para el layout, título, descripción y autor
+title = "<b>Correlación Diaria por Año entre Temperatura y Humedad con Línea de Tendencia</b>"
+description = "Este gráfico muestra la correlación diaria entre la humedad y la temperatura para diferentes años,<br>con una línea de tendencia que indica la dirección general de la relación."
+author_info = "Autor: Mauricio Viera<br>Fuente: Historical Hourly Weather Data 2012-2017"
+
+fig.update_layout(
+    height=850, 
+    width=1100, 
+    title={'text': title, 'y':0.98, 'x':0.5, 'xanchor': 'center', 'yanchor': 'top'},
+    margin=dict(t=120, b=120),
+    annotations=[
+        dict(xref='paper', yref='paper', x=0, y=1.05, xanchor='left', yanchor='bottom', text=description, showarrow=False, align='left'),
+        dict(xref='paper', yref='paper', x=0.5, y=-0.11, xanchor='center', yanchor='top', text=author_info, showarrow=False, align='center')
+    ]
+)
+
+fig.update_xaxes(title_text="Humedad (%)")
+fig.update_yaxes(title_text="Temperatura (°C)")
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada fue Python con Plotly, el diseño es claro y la paleta de colores facilita la distinción entre años. La inclusión de líneas de tendencia para cada año proporciona un resumen visual inmediato de la relación entre las variables. Los diagramas están dispuestos en una cuadrícula, permitiendo una comparación directa entre años.   <br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/104/#/">https://chart-studio.plotly.com/~MauricioViera95/104/#/</a>
+
+</div>
+```
+### 21. green energy
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se muestra como ha variado la adopción de energía renovable en distintas regiones a lo largo del tiempo. Se han utilizado los datos de "Renewable Energy Database" de Our World in Data (2024). 
+</div>
+```
+![](IMG_TEXTO/OUR_WORLD.jpg){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+La audiencia a la que está dirigida esta visualización parece, está compuesta por personas interesadas en la sostenibilidad y la energía, incluyendo investigadores, responsables políticos, inversores en energías renovables, y el público en general consciente del medio ambiente.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Mostar cómo ha cambiado la adopción de energías renovables en distintas regiones a lo largo del tiempo, posiblemente para indicar progreso, comparar regiones, o destacar líderes y rezagados en la transición energética.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera obtener información sobre tendencias en energía renovable, entender qué regiones están liderando el cambio hacia fuentes de energía más sostenibles y cómo se compara su región con otras.<br>
+
+El mensaje principal que el gráfico intenta transmitir es el crecimiento en la adopción de energías renovables, que se observa a través del aumento porcentual a lo largo de los años. La línea morada que muestra un aumento significativo sugiere un fuerte crecimiento en una región específica, mientras que otras líneas indican un crecimiento más moderado o estable.
+</div>
+```
+```{python}
+#| label: GRAFICO21_FIGURA
+#| warning: false
+#| echo: false
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
+# Carga de datos
+data_path = 'DATOS/renewable-share-energy.csv'
+data = pd.read_csv(data_path)
+
+# Filtrar por entidades regionales específicas
+entidades_regionales = ['Africa', 'Asia Pacific', 'Middle Africa', 'North America', 'South America', 'Europe', 'Middle East']
+data_regional = data[data['Entity'].isin(entidades_regionales)]
+
+# Creación del gráfico con Plotly Express
+fig = px.line(data_regional,
+              x="Year",
+              y="Renewables (% equivalent primary energy)",
+              color="Entity",
+              title="<b>Evolución del Porcentaje de Energía Renovable por Región</b>",
+              labels={"Renewables (% equivalent primary energy)": "% de Energía Renovable", "Year": "Año"},
+              )
+
+# Personalización del layout
+fig.update_layout(
+    template="plotly_white",
+    xaxis_title="Año",
+    yaxis_title="% de Energía Renovable",
+    legend_title="Región",
+    legend=dict(
+        yanchor="top",
+        y=0.99,
+        xanchor="left",
+        x=0.01
+    ),
+    xaxis=dict(
+        rangeslider=dict(
+            visible=True,
+            bgcolor="rgba(150,200,250,0.5)"
+        ),
+        type="date"
+    ),
+    font=dict(
+        family="Arial, sans-serif",
+        size=12,
+        color="#7f7f7f"
+    ),
+    margin=dict(t=150, l=0, r=0, b=120),
+    annotations=[
+        dict(
+            xref="paper",
+            yref="paper",
+            x=0.55,
+            y=1.07,
+            xanchor="center",
+            yanchor="top",
+            text="Este gráfico muestra cómo ha variado la adopción de<br> energías renovables en distintas regiones a lo largo del tiempo.",
+            showarrow=False,
+            font=dict(
+                size=13,
+                color="rgb(150,150,150)"
+            )
+        ),
+        dict(
+            xref="paper",
+            yref="paper",
+            x=0.5,
+            y=-0.38,
+            xanchor="center",
+            yanchor="top",
+            text="Fuente: Renewable Energy Database, Autor: Mauricio Viera",
+            showarrow=False,
+            font=dict(
+                size=12,
+                color="rgb(150,150,150)"
+            )
+        )
+    ],
+    height=800  # Ajuste de la altura del gráfico
+)
+
+# Para un control más fino del slider y sus opciones
+fig.update_xaxes(
+    rangeselector=dict(
+        buttons=list([
+            dict(count=5, label="5a", step="year", stepmode="backward"),
+            dict(count=10, label="10a", step="year", stepmode="backward"),
+            dict(count=20, label="20a", step="year", stepmode="backward"),
+            dict(step="all", label="Todo")
+        ]),
+        bgcolor="rgba(150,200,250,0.5)"
+    )
+)
+
+# Ajustes adicionales para mejorar el layout
+fig.update_layout(
+    margin=dict(t=100)  # Ajusta este valor según sea necesario para acomodar el título y las anotaciones
+)
+
+# Mostrar el gráfico
+fig.show()
+
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada fue Python y Plotly, el diseño del gráfico facilita la interpretación de las tendencias a lo largo del tiempo con líneas claramente diferenciadas por color para cada región. La inclusión de un área de enfoque en la parte inferior que muestra la distribución general a lo largo del tiempo y una barra de desplazamiento sugiere que los usuarios pueden interactuar con la visualización para examinar diferentes periodos más de cerca. <br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/106/#/">https://chart-studio.plotly.com/~MauricioViera95/106/#/</a>
+
+</div>
+```
+### 22. mobility
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se muestra la movilidad en referencia a cómo ha cambiado la cantidad de migrantes ecuatorianos hacia diferentes países a lo largo del tiempo. Se ha propuesto utilizar datos de The World Bank (2024).
+
+El gráfico está diseñado para una audiencia que puede incluir demógrafos, responsables de la formulación de políticas, investigadores en migración, ONGs y el público general interesado en las tendencias migratorias.
+</div>
+```
+![](IMG_TEXTO/world_bank.png){fig-align="center"}
+
+<https://databank.worldbank.org/source/global-bilateral-migration/Type/TABLE/preview/on#>
+
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Resaltar las diferencias en la cantidad de migrantes ecuatorianos a varios países a lo largo del tiempo, lo cual podría servir para informar sobre las tendencias migratorias y posiblemente los factores que influyen en estas tendencias.<br>
+
+
+<b>¿Qué espera la audiencia?</b>La audiencia espera comprender cuál fue el destino preferido por los migrantes ecuatorianos desde el año 1960 a 2000, y las cifras pueden indicar la relevancia de ciertos países para la comunidad migrante en ese momento. También podrían estar interesados en los factores sociales, económicos o políticos que condujeron a estas tendencias.<br>
+
+El mensaje clave del gráfico es que Estados Unidos fue el país de destino más popular para los migrantes ecuatorianos desde el año 1960 al 2000, seguido por España, con Argentina y Alemania recibiendo números significativamente menores de migrantes. Este patrón puede llevar a discusiones sobre las políticas de inmigración de los países de destino, las redes migratorias existentes y las oportunidades económicas o desafíos en los países de origen y destino.
+</div>
+```
+```{python}
+#| label: GRAFICO22_FIGURA
+#| warning: false
+#| echo: false
+import pandas as pd
+import plotly.express as px
+
+df = pd.read_csv('DATOS/ecuador_migracion.csv')
+df.head(5)
+
+# Transforma el dataset de un formato ancho a largo
+df_long = pd.melt(df, id_vars=['Country', 'Code', 'Migration_Gender', 'Migration_Gender_Code', 'Country_Dest_Name', 'Country_Dest_Code'],
+                  var_name='Year', value_name='Migrants')
+
+# Convierte la columna 'Year' a numérico y 'Migrants' a float
+df_long['Year'] = pd.to_numeric(df_long['Year'])
+df_long['Migrants'] = pd.to_numeric(df_long['Migrants'], errors='coerce').fillna(0)
+
+# Crear un gráfico de barras animado con espacio adicional para el autor
+fig = px.bar(df_long, x="Country_Dest_Name", y="Migrants", color="Country_Dest_Name",
+             animation_frame="Year", animation_group="Country_Dest_Name",
+             title="<b>Evolución de la Migración Ecuatoriana por País Destino</b>",
+             labels={"Migrants": "Número de Migrantes", "Country_Dest_Name": "País de Destino"},
+             range_y=[0, df_long['Migrants'].max()])
+
+# Agregar descripción bajo el título
+fig.add_annotation(text="Este gráfico muestra cómo ha cambiado la cantidad de migrantes ecuatorianos hacia diferentes países a lo largo del tiempo.",
+                   xref="paper", yref="paper",
+                   x=0, y=1.12, showarrow=False)
+
+# Agregar el nombre del autor en la parte baja del gráfico
+fig.add_annotation(text="Autor: Mauricio Viera<br>Fuente: The World Bank",
+                   xref="paper", yref="paper",
+                   x=0.5, y=-0.6, showarrow=False,  # Ajusta este valor según sea necesario
+                   font=dict(size=10, color="grey"),
+                   align="center")
+
+# Mejorar el layout para una mejor visualización y especificar dimensiones
+fig.update_layout(xaxis_title='País de Destino',
+                  yaxis_title='Número de Migrantes',
+                  legend_title='País de Destino',
+                  margin=dict(t=100, b=200),  # Aumenta el margen inferior para dar más espacio para la anotación del autor
+                  height=600, width=1000)  # Ajusta estas dimensiones como prefieras
+
+# Mostrar el gráfico
+fig.show()
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada fue Python y Plotly, la elección del gráfico de barras es efectiva para mostrar comparaciones entre categorías (países de destino). El uso de colores distintos para cada país ayuda a diferenciar rápidamente entre ellos. El control deslizante indica interactividad, lo que permite a los usuarios explorar cómo han cambiado estos números a lo largo de los años. <br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/108/#/">https://chart-studio.plotly.com/~MauricioViera95/108/#/</a>
+
+</div>
+```
+### 23. tiles
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se muestra el uso del agua en diversas categorías a lo largo del tiempo en Estados Unidos. Se ha propuesto utilizar datos de United States Geological Survey [USGS] (2024).
+</div>
+```
+![](IMG_TEXTO/usgs.png){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+El gráfico estaría dirigido a ambientalistas, investigadores, políticos, urbanistas, y la comunidad en general interesada en la gestión del agua y la sostenibilidad.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Mostrar cómo ha variado el uso del agua en distintas categorías a lo largo de los años, posiblemente para identificar tendencias, aumentos o disminuciones en el uso del agua en diversas actividades humanas e industriales.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia querrá entender cómo se ha administrado y distribuido el recurso hídrico en diferentes sectores a lo largo del tiempo, con el fin de identificar posibles áreas de eficiencia o derroche, y para informar políticas de gestión del agua futuras.<br>
+
+El mensaje principal del gráfico es proporcionar una perspectiva histórica del uso del agua en los EE. UU. por categoría. El uso del color indica la cantidad de agua utilizada, con tonos más oscuros que representan un mayor uso. La intención es mostrar tendencias o cambios significativos a lo largo del tiempo, lo que puede reflejar el impacto de la tecnología, la regulación, el cambio climático y otros factores en el uso del agua.
+</div>
+```
+```{python}
+#| label: GRAFICO23_FIGURA
+#| warning: false
+#| echo: false
+import pandas as pd
+import plotly.express as px
+
+# Cargar el dataset
+data = pd.read_csv('DATOS/water_use.csv')
+
+# Transformar los datos para un formato más adecuado para Plotly
+data_melted = data.melt(id_vars=["National_Totals"], var_name="Year", value_name="Water_Use_Bgal/d")
+
+# Convertir valores a numéricos (ignorando errores para manejar los 'a' al final de algunos números)
+data_melted["Water_Use_Bgal/d"] = pd.to_numeric(data_melted["Water_Use_Bgal/d"], errors='coerce')
+
+traducciones_categorias = {
+    'Population_in_millions': 'Población en millones',
+    'Total_withdrawals_in_Bgal/d': 'Retiros totales en Bgal/d',
+    'Public_supply_in_Bgal/d': 'Suministro público en Bgal/d',
+    'Self-supplied_domestici-in_Bgal/d<2.1': 'Autoabastecido doméstico en Bgal/d',
+    'Livestock_in_Bgal/d': 'Ganadería en Bgal/d',
+    'Irrigation_in_Bgal/d': 'Irrigación en Bgal/d',
+    'Thermoelectric_power/d': 'Energía termoeléctrica en Bgal/d',
+    'Self-supplied_industrial_in_Bgal/d': 'Autoabastecido industrial en Bgal/d',
+    'Mining_In_Bgal/d': 'Minería en Bgal/d',
+    'Commercial_in_Bgal/d': 'Comercial en Bgal/d',
+    'Aquaculture_in_Bgal/d': 'Acuicultura en Bgal/d',
+    'Total_Groundwater_fresh_in_Bgal/d': 'Agua subterránea total fresca en Bgal/d',
+    'Total_Groundwater_saline_in_Bgal/d': 'Agua subterránea total salina en Bgal/d',
+    'Total_Surface_water_fresh': 'Agua superficial total fresca en Bgal/d',
+    'Total_Surface_water_saline': 'Agua superficial total salina en Bgal/d'
+}
+
+# Aplicar las traducciones al DataFrame
+data_melted['National_Totals'] = data_melted['National_Totals'].map(traducciones_categorias)
+# Asumiendo que data_melted es tu DataFrame ya preparado y traducido
+
+
+fig = px.density_heatmap(data_melted, x='Year', y='National_Totals', z='Water_Use_Bgal/d',
+                         color_continuous_scale=px.colors.sequential.Inferno,
+                         labels={'Water_Use_Bgal/d': 'Uso del Agua (Bgal/d)', 'Year': 'Año', 'National_Totals': 'Categorías de Uso'},
+                         title='<b>Uso del Agua en EE.UU. a lo Largo del Tiempo por Categoría</b><br><sub>Esta visualización muestra el uso del agua en diversas categorías a lo largo del tiempo.</sub>')
+
+# Ajustar el layout para incluir espacio para la descripción y los créditos
+fig.update_layout(
+    xaxis=dict(title='Año', tickmode='linear'),
+    yaxis=dict(title='Categoría de Uso'),
+    coloraxis_colorbar=dict(title='Uso del Agua (Bgal/d)'),
+    margin=dict(l=40, r=40, t=100, b=100),  # Ajustar según sea necesario
+    title_x=0.5  # Centrar el título
+)
+
+# Añadir anotación para el autor y la fuente de datos
+fig.add_annotation(
+    text='Autor: Mauricio Viera<br>Fuente: USGS',
+    align='left',
+    showarrow=False,
+    xref='paper',
+    yref='paper',
+    x=0.5,
+    y=-0.3,  # Ajustar según sea necesario para evitar la sobreposición
+    font=dict(size=11)
+)
+
+fig.update_traces(xgap=3, ygap=3)
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada fue Python y Plotly, el diseño del gráfico es eficiente para mostrar muchos datos en un formato condensado. Los mapas de calor son especialmente buenos para destacar variaciones y patrones dentro de grandes conjuntos de datos. Cada cuadrado en el gráfico representa una combinación específica de año y categoría de uso, con el color correspondiente al volumen de uso del agua, lo cual facilita la identificación de tendencias y anomalías.<br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/110/#/">https://chart-studio.plotly.com/~MauricioViera95/110/#/</a>
+
+</div>
+```
+### 24. theme day: ILO Africa
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática propuesta se muestra las tasas de empleo de mujeres en Nigeria según su nivel educativo a lo largo de tres puntos en el tiempo: 2016, 2019 y 2022 (ILOSTAT, 2024).
+</div>
+```
+![](IMG_TEXTO/ILO.jpg){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+La visualización está diseñada para economistas, sociólogos, educadores, formuladores de políticas y organizaciones que trabajan para mejorar las oportunidades de empleo para las mujeres, especialmente en Nigeria.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Proporcionar una perspectiva clara sobre cómo los distintos niveles de educación afectan la empleabilidad de las mujeres en Nigeria y cómo esto ha cambiado a lo largo de los años. El objetivo es destacar la importancia de la educación en la empleabilidad.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera entender las disparidades en las tasas de empleo entre diferentes niveles educativos y cómo estas tendencias cambian con el tiempo, lo cual es crucial para dirigir esfuerzos de desarrollo y políticas educativas.<br>
+
+El mensaje principal es que hay una variación notable en las tasas de empleo de las mujeres en función de su nivel educativo y que esta variación puede cambiar con el tiempo, lo que sugiere un dinamismo en el mercado laboral y la influencia de la educación en las oportunidades de empleo.
+</div>
+```
+```{python}
+#| label: GRAFICO24_FIGURA
+#| warning: false
+#| echo: false
+import pandas as pd
+import plotly.express as px
+
+# Cargar el dataset
+file_path = 'DATOS/nigeria.csv'
+data = pd.read_csv(file_path)
+
+# Filtrar los datos para incluir solo las categorías específicas de interés
+categories_of_interest = [
+    "Education (Aggregate levels): Less than basic",
+    "Education (Aggregate levels): Basic",
+    "Education (Aggregate levels): Intermediate",
+    "Education (Aggregate levels): Advanced"
+]
+filtered_data = data[data['classif2.label'].isin(categories_of_interest)]
+
+# Agrupar los datos por año y nivel de educación, calculando el promedio de la tasa de empleo
+grouped_data = filtered_data.groupby(['time', 'classif2.label']).agg({'obs_value':'mean'}).reset_index()
+
+# Remover la parte redundante de la etiqueta
+grouped_data['classif2.label'] = grouped_data['classif2.label'].str.replace("Education (Aggregate levels): ", "")
+
+# Renombrar las columnas
+grouped_data.rename(columns={'classif2.label': 'Education Level', 'obs_value': 'Employment Rate'}, inplace=True)
+
+# Crear el gráfico de barras
+fig = px.bar(grouped_data,
+             x='time',
+             y='Employment Rate',
+             color='Education Level',
+             pattern_shape="Education Level",
+             barmode='group',
+             title='Employment Rate in Nigeria by Education Level Over Time (Female)',
+             labels={'time': 'Year', 'Employment Rate': 'Employment Rate (%)'},
+             color_discrete_sequence=px.colors.qualitative.Bold,
+             template="plotly_dark")
+
+# Añadir descripción bajo el título
+fig.add_annotation(xref='paper', yref='paper', x=0.5, y=-0.25,
+                   text="This graph displays the changes in employment rates across different education levels over time for the female population.",
+                   showarrow=False, align='center')
+
+# Añadir autor y fuente de datos
+fig.add_annotation(xref='paper', yref='paper', x=0.5, y=-0.35,
+                   text="Author: Mauricio Viera | Data Source: ILO AFRICA-STATISTICS",
+                   showarrow=False, align='center', font_size=11)
+
+# Mejoras adicionales para visibilidad de líneas de ejes
+fig.update_xaxes(showline=True, linewidth=2, linecolor='gray')
+fig.update_yaxes(showline=True, linewidth=2, linecolor='gray')
+
+# Ajustar layout para acomodar anotaciones y tratar de centrar el gráfico
+fig.update_layout(
+    title={
+        'text': "Employment Rate in Nigeria by Education Level Over Time (Female)",
+        'y':0.95,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top',
+        'font': dict(size=20,family='Arial, bold')
+    },
+    margin=dict(t=140, b=120, l=100, r=100),  # Ajuste de márgenes para intentar centrar
+    legend_title='Education Level',
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=1
+    ),
+    title_x=0.5,  # Centrar el título
+)
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada fue Python y Plotly, el diseño utiliza colores distintivos y patrones de rayado para diferenciar entre los niveles educativos. Las barras están agrupadas por año, lo que facilita la comparación entre los diferentes niveles educativos a lo largo del tiempo.<br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/114/#/">https://chart-studio.plotly.com/~MauricioViera95/114/#/</a>
+
+</div>
+```
+## Uncertainties
+
+![](IMG_TEXTO/Uncertainties.png){fig-align="center" width="256"}
+
+### 25. global change
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se muestra el cambio de la temperatura global anual y su grado de incertidumbre. Se propuso utilizar datos de Our World in Data (2024). 
+</div>
+```
+![](IMG_TEXTO/OUR_WORLD.jpg){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+La visualización está dirigida a climatólogos, investigadores medioambientales, formuladores de políticas, educadores y el público en general interesado en el cambio climático y sus efectos.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Ilustrar la tendencia del calentamiento global a lo largo de los años y destacar la variabilidad y la incertidumbre en las mediciones de la temperatura. Esto puede ayudar a comprender la magnitud del cambio climático y su progresión a lo largo del tiempo.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera entender la tendencia del cambio climático en términos de datos de temperatura a lo largo del tiempo. Están interesados en visualizar cómo ha cambiado la temperatura global y la confianza en esos cambios, lo que puede influir en sus opiniones o decisiones relacionadas con el medio ambiente.<br>
+
+El mensaje principal del gráfico es que la temperatura global ha aumentado significativamente desde 1850, con una aceleración notable en las últimas décadas. La representación visual del rango de incertidumbre también comunica que, a pesar de las variaciones anuales, la tendencia general es claramente ascendente.
+</div>
+```
+```{python}
+#| label: GRAFICO25_FIGURA
+#| warning: false
+#| echo: false
+import pandas as pd
+import plotly.graph_objects as go
+
+# Cargar los datos
+data = pd.read_csv('DATOS/temperature-anomaly.csv')
+
+import plotly.graph_objects as go
+import pandas as pd
+
+# Crear el gráfico
+fig = go.Figure()
+
+# Añadir la línea de temperatura media
+fig.add_trace(go.Scatter(
+    x=data['Year'], y=data['global_average_temp'], 
+    mode='lines', 
+    name='Temperatura Media Global',
+    line=dict(color='blue', width=2)  # Línea más visible
+))
+
+# Añadir el área de incertidumbre
+fig.add_trace(go.Scatter(
+    x=data['Year'].tolist() + data['Year'].iloc[::-1].tolist(),
+    y=data['upper_bound'].tolist() + data['lower_bound'].iloc[::-1].tolist(),
+    fill='toself', 
+    fillcolor='rgba(0, 100, 80, 0.3)',  # Color y transparencia del área de incertidumbre
+    line=dict(color='rgba(255,255,255,0)'),
+    name='Rango de Incertidumbre',
+    hoveron='fills'  # Permitir el hover solo en el área de incertidumbre
+))
+
+# Ajustes del layout
+fig.update_layout(
+    title='<b>Variación de la Temperatura Global y su Incertidumbre (1850 - Presente)<b>',
+    title_x=0.5,  # Centrar el título
+    xaxis_title='Año',
+    yaxis_title='Anomalía de Temperatura (°C)',
+    hovermode='x unified',
+    width=1200,  # Ajustar la anchura del gráfico
+    height=600,  # Ajustar la altura del gráfico
+    xaxis=dict(
+        showline=True, 
+        showgrid=True, 
+        showticklabels=True, 
+        linecolor='black', 
+        linewidth=2,
+        ticks='outside',
+        tickfont=dict(
+            family='Arial',
+            size=12,
+            color='black'
+        ),
+        gridcolor='lightgrey',  # Color de la grilla
+        tickmode='linear',
+        tick0=1850,
+        dtick=5
+    ),
+    yaxis=dict(
+        showline=True,
+        showgrid=True,
+        showticklabels=True,
+        linecolor='black',
+        linewidth=2,
+        ticks='outside',
+        tickfont=dict(
+            family='Arial',
+            size=12,
+            color='black'
+        ),
+        gridcolor='lightgrey'  # Color de la grilla
+    ),
+    font=dict(size=12, color='black'),
+    plot_bgcolor='white',
+    paper_bgcolor='white',
+    margin=dict(l=40, r=40, t=40, b=120)  # Ajustar margen inferior a 120 para más espacio
+)
+
+# Añadir descripciones
+fig.add_annotation(
+    xref='paper', yref='paper', x=0.5, y=-0.2, xanchor='center', yanchor='top',
+    text='Autor: Mauricio Viera | Fuente: Our world in data ',
+    showarrow=False,
+    font=dict(size=11, color='grey')
+)
+
+# Descripción bajo el título
+fig.add_annotation(
+    xref='paper', yref='paper', x=0.5, y=1, xanchor='center', yanchor='bottom',
+    text='Este gráfico interactivo muestra la temperatura media global anual y su rango de incertidumbre.',
+    showarrow=False,
+    font=dict(size=12, color='black')
+)
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada fue Python y Plotly, el diseño es claro y comunicativo, con la línea de tendencia y el sombreado que ofrecen una interpretación directa de la información. La elección del color es sutil y profesional, y el sombreado proporciona una comprensión instantánea de la variabilidad de las mediciones sin sobrecargar el gráfico con información excesiva. <br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/112/#/">https://chart-studio.plotly.com/~MauricioViera95/112/#/</a>
+
+</div>
+```
+### 26. AI
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática se muestra la inversión corporativa global anual en inteligencia artificial (IA), desglosada por tipo de inversión desde 2013 hasta 2025. Se propuso utilizar datos de Our World in Data (2024).
+</div>
+```
+![](IMG_TEXTO/OUR_WORLD.jpg){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+El gráfico está dirigido a profesionales y analistas del sector financiero, tecnológico o inversores interesados en tendencias del mercado de IA, así como a responsables de políticas y planificación económica.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Proporcionar una visión clara de cómo se distribuye la financiación en diferentes tipos de inversiones en IA y cómo ha evolucionado esta distribución a lo largo del tiempo y a futuro con cierta incertidumbre.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia espera entender rápidamente las tendencias en inversiones en IA, identificar qué tipos de inversión son más comunes y cómo la proporción de estas inversiones ha cambiado con el tiempo.<br>
+
+El gráfico podría formar parte de una presentación o informe destinado a discutir la evolución del interés y la confianza en la tecnología de IA. La combinación de colores distintos para cada tipo de inversión y la anotación de cifras concretas en cada segmento de barra facilita la comprensión de las magnitudes relativas y las tendencias a lo largo del tiempo.
+</div>
+```
+```{python}
+#| label: GRAFICO26_FIGURA
+#| warning: false
+#| echo: false
+data2 = pd.read_csv('DATOS/ai3.csv',sep=';')
+
+data2['corporate investment_inflation adjusted'] = data2['corporate investment_inflation adjusted'].str.replace(',', '').astype('int64')
+
+import plotly.express as px
+
+# Asegúrate de que 'df_for_chart' es tu dataframe que incluye los datos actualizados.
+fig = px.bar(
+    data2,
+    x="Year",
+    y="corporate investment_inflation adjusted",
+    color="Entity",
+    title="<b>Annual Global Corporate Investment in Artificial Intelligence, by Type<b>",
+    labels={"corporate investment_inflation adjusted": "Corporate Investment (Inflation Adjusted)"}
+)
+
+# Actualiza la presentación del gráfico para mostrar los años en orden ascendente
+fig.update_layout(
+    xaxis=dict(type='category', categoryorder='category ascending'),
+    xaxis_title="Year",
+    yaxis=dict(title='Investment in US Dollars (adjusted for inflation)', type='linear'),
+    legend_title="Type of Investment",
+    barmode='stack',
+    uniformtext_minsize=12,
+    uniformtext_mode='hide',
+    autosize=False,  # Permitir tamaño personalizado
+    width=1200,  # Ancho del gráfico
+    height=800,   # Alto del gráfico
+    margin=dict(t=120, l=120, r=100, b=120)
+)
+
+# Añadir descripción y fuente de datos
+fig.add_annotation(text="This data represents a AI projection of investments.",
+                   xref="paper", yref="paper", x=0, y=1.05, showarrow=False)
+fig.add_annotation(text="Author: Mauricio Viera | Data Source: Our world in data",
+                   xref="paper", yref="paper", x=0, y=-0.1, showarrow=False)
+fig.update_traces(
+    textfont=dict(size=18),  # Ajusta el tamaño del texto de las etiquetas
+    textposition='inside'    # Asegúrate de que el texto se coloque dentro de las barras
+)
+# Añade el formato al texto de las barras para mejor claridad
+for trace in fig.data:
+    trace.text = ['${:,.0f}B'.format(i / 1e9) for i in trace.y]
+
+
+# Muestra el gráfico
+fig.show()
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada fue Python y Plotly, el diseño del gráfico es visualmente claro y utiliza colores vivos para diferenciar entre los tipos de inversión en inteligencia artificial. Además, el uso de barras apiladas es efectivo para mostrar la composición de las inversiones totales, así como su evolución a lo largo del tiempo.<br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/117/#/">https://chart-studio.plotly.com/~MauricioViera95/117/#/</a>
+
+</div>
+```
+### 27. good/bad
+
+```{=html}
+<div style = "text-align:justify";>
+Para este gráfico se  muestra la temática "good/bad" mediante el cambio neto en la vegetación (ganancia o pérdida) por país miembro de la OECD. Se utilizan los datos de los países miembros de la OECD. 
+</div>
+```
+![](IMG_TEXTO/oecd.png){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+La visualización parece estar dirigida a personas interesadas en el medio ambiente, cambios ecológicos, y política ambiental, incluyendo investigadores, responsables políticos, educadores, y el público en general consciente del medio ambiente.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Educar y concienciar sobre cómo diferentes países están progresando o retrocediendo en términos de vegetación y, por implicación, salud ecológica.<br>
+
+
+<b>¿Qué espera la audiencia?</b> Obtener información clara y accesible sobre las tendencias ecológicas y ambientales, potencialmente para informar decisiones, políticas o comportamientos personales.<br>
+
+El mensaje principal es la representación visual del cambio neto de vegetación, lo que permite a la audiencia comprender rápidamente qué países están ganando o perdiendo vegetación y en qué medida.
+</div>
+```
+```{python}
+#| label: GRAFICO27_FIGURA
+#| warning: false
+#| echo: false
+#| 
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Cargar los datos
+data = pd.read_csv('DATOS/gain_loss.csv')
+
+import pandas as pd
+import plotly.express as px
+
+# Suponiendo que ya tienes el dataframe 'data' cargado y listo
+
+# Calcular la diferencia entre ganancia y pérdida
+data['net_gain'] = data['gain'] - data['loss']
+data['net_gain'] = data['net_gain'].round(2)  # Redondear a dos decimales
+
+# Ordenar los datos por 'net_gain' para mejorar la visualización
+data_sorted = data.sort_values('net_gain')
+
+# Crear el gráfico de barras divergentes con Plotly
+fig = px.bar(data_sorted, y='location', x='net_gain', 
+             title='Net Gain/Loss of Vegetation by Country',
+             labels={'net_gain': 'Net Gain/Loss of Vegetation (%)', 'location': 'Country'},
+             color='net_gain',
+             color_continuous_scale=px.colors.diverging.Tealrose,
+             template='plotly_white',
+             text='net_gain',
+             height=800,  # Aumentar la altura del gráfico
+             width=1200)  # Aumentar la anchura del gráfico
+# Ajustar el espacio entre las barras y su grosor
+fig.update_layout(
+    barmode='overlay',  # Sobreponer las barras si es necesario
+    bargap=0.005  # Reducir el espacio entre barras para hacerlas más gruesas
+)
+# Mejorar la visualización de las etiquetas
+fig.update_traces(texttemplate='%{text:.2f}',  # Asegura que se muestre con dos decimales
+                  textfont=dict(size=10, color='black', family='Arial'))  # Aumentar tamaño y cambiar fuente
+
+# Añadir la descripción y los créditos
+fig.update_layout(
+    title={'text': '<b>Net Gain/Loss of Vegetation by Country</b>',
+           'y': 0.99,
+           'x': 0.5,
+           'xanchor': 'center',
+           'yanchor': 'top'},
+    margin=dict(t=100,b=100),
+    annotations=[
+        dict(
+            x=0.5,
+            y=-0.12,
+            showarrow=False,
+            text="Author: Mauricio Viera | Source: OECD",
+            xref="paper",
+            yref="paper"
+        ),
+        dict(
+            x=0.5,
+            y=1.1,
+            showarrow=False,
+            text="This chart displays the net change in vegetation, capturing both gains and losses to highlight countries facing ecological challenges or improvements.",
+            xref="paper",
+            yref="paper"
+        )
+    ]
+)
+
+# Mostrar el gráfico
+fig.show()
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada fue Python y Plotly, el diseño presenta una disposición de barras horizontales, donde cada barra representa un país y su correspondiente ganancia o pérdida neta de vegetación, medida en porcentaje. La elección de colores va desde tonos fríos para las pérdidas hasta tonos cálidos para las ganancias, lo cual es intuitivo y refleja la dualidad natural/positivo versus industrializado/negativo en la narrativa ecológica.<br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/119/#/">https://chart-studio.plotly.com/~MauricioViera95/119/#/</a>
+
+</div>
+```
+### 28. trend
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta gráfico se  muestra la temática "trend" mediante las predicciones de temperatura para los próximos seis meses en los Grandes Lagos. Se utilizan los datos prorcionados por GLERL (2024). 
+</div>
+```
+![](IMG_TEXTO/NOAA.jpg){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+La visualización está dirigida a un público interesado en la climatología, meteorología o específicamente en las predicciones de temperatura, tal vez con un enfoque en la investigación o la gestión ambiental de los Grandes Lagos. Esto podría incluir académicos, científicos, profesionales de la gestión de recursos naturales o responsables de la toma de decisiones políticas.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Proporcionar una representación clara de las predicciones de temperatura para los próximos seis meses en los Grandes Lagos, como resultado de las investigaciones de la NOAA GLERL y sus socios.<br>
+
+
+<b>¿Qué espera la audiencia?</b> La audiencia esperaría información detallada y precisa que pueda respaldar la planificación y las políticas relacionadas con el cambio climático y el medio ambiente.<br>
+
+El mensaje principal se centra en mostrar tendencias y variaciones mensuales en las predicciones de temperatura, permitiendo a los espectadores observar patrones o anomalías. A través de un documento o presentación, se esperaría que esta visualización respalde una narrativa más amplia sobre el clima y sus posibles impactos o variaciones.
+</div>
+```
+```{python}
+#| label: GRAFICO28_FIGURA
+#| warning: false
+#| echo: false
+
+import pandas as pd
+import plotly.graph_objects as go
+
+# Cargar datos
+data = pd.read_csv('DATOS/eri_202401_forecast_temp.csv')
+
+# Calcular la media y la desviación estándar para cada mes
+mean_std = data.aggregate(['mean', 'std']).T
+mean_std['lower'] = mean_std['mean'] - mean_std['std']
+mean_std['upper'] = mean_std['mean'] + mean_std['std']
+
+# Crear una figura
+fig = go.Figure()
+
+# Definir una paleta de colores más claros
+colors = ['lightblue', 'lightcoral', 'lightgreen', 'lightpink', 'plum', 'khaki']
+
+# Agregar barras de fondo para representar la media histórica y desviación estándar
+for i, month in enumerate(data.columns):
+    fig.add_trace(go.Bar(
+        x=[month],
+        y=[mean_std.loc[month, 'upper'] - mean_std.loc[month, 'lower']],
+        base=[mean_std.loc[month, 'lower']],
+        marker=dict(color='lightgrey'),
+        showlegend=False
+    ))
+
+# Agregar los diagramas de violín para cada mes con colores distintos
+for i, month in enumerate(data.columns):
+    fig.add_trace(go.Violin(y=data[month], name=month,
+                            box_visible=True, meanline_visible=True,
+                            line_color='black',
+                            fillcolor=colors[i],
+                            side='positive',
+                            marker=dict(color=colors[i]),
+                            points='all',
+                            pointpos=-0.5,
+                            width=1,
+                            legendgroup=month,
+                            showlegend=True))
+
+# Personalizar el diseño del gráfico
+fig.update_layout(
+    title='<b>Predicción de Temperatura en los Grandes Lagos (2024)</b>',
+    title_x=0.5,  # Centrar el título
+    title_font=dict(size=16),
+    yaxis_title='Temperatura (grados °C)',
+    xaxis_title='Mes',
+    violingap=0.1,
+    violingroupgap=0,
+    violinmode='overlay',
+    margin=dict(t=90, l=100, r=100, b=120),
+    annotations=[
+        dict(text='Este gráfico representa las predicciones de temperatura para los próximos seis meses del 2024 en los Grandes Lagos,<br> generadas en el marco de los esfuerzos de investigación de la NOAA GLERL y sus socios.',
+             xref='paper', yref='paper', x=0.5, xanchor='center', yanchor='top', showarrow=False, y=1.1),
+        dict(text='Autor: Mauricio Viera | Fuente: NOAA - Great Lakes Environmental Research Laboratory', xref='paper', yref='paper',
+             x=0.5, xanchor='center', yanchor='top', showarrow=False, y=-0.15)
+    ]
+)
+
+# Mostrar el gráfico
+fig.show()
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada fue Python y Plotly, el uso de un gráfico de violín proporciona una rica densidad de información, mostrando no solo la mediana y los cuartiles, sino también la distribución completa de los datos de temperatura para cada mes. Esto ofrece una visión más completa que un simple gráfico de caja y bigotes. Los colores seleccionados para cada mes son distintos y permiten una fácil distinción entre ellos, mientras que el diseño general es limpio y no sobrecargado, lo que facilita la lectura e interpretación. <br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/121/#/">https://chart-studio.plotly.com/~MauricioViera95/121/#/</a>
+
+</div>
+```
+### 29. black & white
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta gráfico se  muestra la temática "black & white" mediante las proyecciones de población desde 2021, comparadas con la base del año 2010 (penúltimo censo). Se utilizan los datos prorcionados por el Instituto Naciona del Estadística y Censos [INEC] (2024) del Ecuador. 
+</div>
+```
+![](IMG_TEXTO/inec.png){fig-align="center" width="276"}
+
+```{=html}
+<div style = "text-align:justify";>
+Este gráfico está dirigido a demógrafos, planificadores urbanos, políticos, y cualquier parte interesada en el desarrollo social y económico que dependa de la comprensión de las dinámicas poblacionales. También es relevante para organizaciones que se enfoquen en la igualdad de género y estudios de población. 
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Representar visualmente las proyecciones de la población por género en comparación con un año base, en este caso, el 2010, destacando los cambios porcentuales anuales y resaltando las tendencias demográficas.<br>
+
+
+<b>¿Qué espera la audiencia?</b> Obtener una comprensión clara de las tendencias en las proyecciones de la población por género para la planificación de recursos, políticas sociales, o para la investigación demográfica. Esperarían ver datos precisos y una representación que permita comparar fácilmente las variaciones entre hombres y mujeres a lo largo del tiempo.<br>
+
+El mensaje refleja la comparación de crecimiento entre poblaciones masculinas y femeninas, indicando posibles implicaciones para la sociedad, como el impacto en los mercados laborales, la necesidad de servicios sociales y educativos, o la planificación de la jubilación y la salud en el largo plazo.
+</div>
+```
+```{python}
+#| label: GRAFICO29_FIGURA
+#| warning: false
+#| echo: false
+#| 
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load data
+data = pd.read_csv('DATOS/inec.csv', delimiter=';')
+
+import plotly.graph_objects as go
+import pandas as pd
+
+# Base population from 2010
+base_population = 7500000
+
+# Calculate percentage growth from 2010
+data['pct_growth_hombres'] = ((data['hombres'] - base_population) / base_population) * 100
+data['pct_growth_mujeres'] = ((data['mujeres'] - base_population) / base_population) * 100
+
+# Create a bar plot
+fig = go.Figure()
+
+# Adding bar for hombres
+fig.add_trace(go.Bar(
+    x=data['anio'],
+    y=data['pct_growth_hombres'],
+    name='Hombres',
+    marker_color='black',
+    text=data['pct_growth_hombres'].apply(lambda x: f'{x:.1f}%')
+))
+
+# Adding bar for mujeres
+fig.add_trace(go.Bar(
+    x=data['anio'],
+    y=data['pct_growth_mujeres'],
+    name='Mujeres',
+    marker_color='white',
+    text=data['pct_growth_mujeres'].apply(lambda x: f'{x:.1f}%')
+))
+
+# Update layout
+fig.update_layout(
+    title='<b>Comparación de Proyección de Población por Género<b>',
+    plot_bgcolor='lightgray',
+    paper_bgcolor='lightgray',
+    xaxis=dict(
+        title='Año',
+        gridcolor='white',
+        gridwidth=0.5,
+        linecolor='black',
+        linewidth=2,
+        tickmode='linear'
+    ),
+    yaxis=dict(
+        title='Cambio Porcentual en la Población desde 2010',
+        gridcolor='white',
+        gridwidth=0.5,
+        linecolor='black',
+        linewidth=2,
+        tickmode='linear',
+        tickformat='0.1f%',
+        range=[min(data['pct_growth_hombres'].min(), data['pct_growth_mujeres'].min()) - 1, 
+               max(data['pct_growth_hombres'].max(), data['pct_growth_mujeres'].max()) + 1]  # Start at min value -1% and extend to max value +1% for visibility
+    ),
+    legend=dict(
+        x=0.01,
+        y=0.99,
+        bgcolor='rgba(255, 255, 255, 0.5)',  # Making legend slightly transparent
+        bordercolor='rgba(255, 255, 255, 0)'
+    ),
+    margin=dict(l=80, r=80, t=100, b=100)  # Adjust margins to prevent clipping
+)
+
+# Annotations for description, footer
+fig.add_annotation(
+    text='Proyecciones de población desde 2021 comparadas con la base del año 2010 (penúltimo censo).',
+    xref='paper', yref='paper',
+    x=0.5, y=1.07,
+    showarrow=False,
+    align='center',
+    font=dict(size=11),
+    bgcolor='lightgray'
+)
+fig.add_annotation(
+    text='Autor: Mauricio Viera - Fuente: Instituto Nacional de Estadísticas y Censos - Ecuador',
+    xref='paper', yref='paper',
+    x=0.5, y=-0.19,
+    showarrow=False,
+    align='center',
+    font=dict(size=11),
+    bgcolor='lightgray'
+)
+
+# Show plot
+fig.show()
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada fue Python y Plotly, el diseño aplicado en el gráfico emplea barras de colores contrastantes para distinguir entre géneros, lo que facilita la comparación visual inmediata. El uso del cambio porcentual como métrica permite una comparación relativa en lugar de absoluta, lo que es efectivo para datos que pueden tener una gran disparidad en los valores absolutos. <br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/123/#/">https://chart-studio.plotly.com/~MauricioViera95/123/#/</a>
+
+</div>
+```
+### 30. theme day: FiveThiryEight
+
+```{=html}
+<div style = "text-align:justify";>
+Para esta temática propuesta se determinó utilizar el estilo "fivethirtyeight" de matplotlib. Se procedió a utilizar los datos de precipitación en los Grandes Lagos. Se utilizan los datos prorcionados por GLERL (2024). 
+</div>
+```
+![](IMG_TEXTO/NOAA.jpg){fig-align="center"}
+
+![](IMG_TEXTO/five.jpg){fig-align="center"}
+
+```{=html}
+<div style = "text-align:justify";>
+La visualización está orientada a meteorólogos, climatólogos, agricultores, planificadores de recursos hídricos y cualquier profesional o interesado en el análisis climático y la preparación ante condiciones meteorológicas futuras.
+</div>
+```
+```{=html}
+<div style = "text-align:justify";>
+
+<b>¿Qué se espera de la gráfica?</b> Ilustrar las predicciones de precipitación mensual y proporcionar una representación visual que permita comparar rápidamente las proyecciones de precipitaciones entre los meses, incluyendo variabilidad y atípicos.<br>
+
+
+<b>¿Qué espera la audiencia?</b> Una comprensión clara y rápida de las predicciones de precipitaciones para la planificación agrícola, la gestión del agua y la preparación para eventos meteorológicos. La audiencia espera datos confiables y una representación que permita sacar conclusiones sobre la variabilidad estacional y mensual.<br>
+
+La presentación está diseñada para transmitir un mensaje sobre la variabilidad esperada en las precipitaciones durante los meses de 2024, permitiendo a la audiencia anticipar y prepararse para diferentes escenarios climáticos.
+</div>
+```
+```{python}
+#| label: GRAFICO30_FIGURA
+#| warning: false
+#| echo: false
+
+import pandas as pd
+import plotly.graph_objects as go
+
+# Cargar datos
+data = pd.read_csv('DATOS/precip.csv')
+import plotly.graph_objects as go
+import pandas as pd
+
+# Suponiendo que 'data' es tu DataFrame cargado
+mean_std = data.aggregate(['mean', 'std']).T
+mean_std['lower'] = mean_std['mean'] - mean_std['std']
+mean_std['upper'] = mean_std['mean'] + mean_std['std']
+
+# Crear una figura
+fig = go.Figure()
+
+# Colores estilo FiveThirtyEight
+colors = ['#30a2da', '#fc4f30', '#e5ae38', '#6d904f', '#8b8b8b', '#810f7c']
+
+# Agregar barras de fondo para representar la media histórica y desviación estándar
+for i, month in enumerate(data.columns):
+    fig.add_trace(go.Bar(
+        x=[month],
+        y=[mean_std.loc[month, 'upper'] - mean_std.loc[month, 'lower']],
+        base=[mean_std.loc[month, 'lower']],
+        marker=dict(color='#E5E5E5'),  # Gris claro para el fondo, emulando la estética FiveThirtyEight
+        showlegend=False
+    ))
+
+# Agregar los diagramas de violín para cada mes con colores distintos
+for i, month in enumerate(data.columns):
+    fig.add_trace(go.Violin(y=data[month], name=month,
+                            box_visible=True, meanline_visible=True,
+                            line_color='black',
+                            fillcolor=colors[i],
+                            side='positive',
+                            marker=dict(color=colors[i]),
+                            points='all',
+                            pointpos=-0.5,
+                            width=1,
+                            legendgroup=month,
+                            showlegend=True))
+
+# Personalizar el diseño del gráfico al estilo FiveThirtyEight
+fig.update_layout(
+    title='<b>Predicción de Precipitaciones en los Grandes Lagos (2024)</b>',
+    title_x=0.5,
+    title_font=dict(size=16, family='Arial, sans-serif'),
+    yaxis_title='Precipitación (mm)',
+    xaxis_title='Mes',
+    violingap=0.1,
+    violingroupgap=0,
+    violinmode='overlay',
+    plot_bgcolor='#f0f0f0', # Fondo claro al estilo FiveThirtyEight
+    paper_bgcolor='#f0f0f0', # Fondo claro al estilo FiveThirtyEight
+    font=dict(
+        family="Arial, sans-serif",
+        size=11,
+        color="#444444"
+    ),
+    margin=dict(t=100, l=100, r=100, b=100),
+    annotations=[
+        dict(text='Este gráfico representa las predicciones de precipitaciones para los próximos meses en 2024<br> en los Grandes Lagos, considerando la media histórica y la desviación estándar.',
+             xref='paper', yref='paper', x=0.5, xanchor='center', yanchor='top', showarrow=False, y=1.1),
+        dict(text='Autor: Mauricio Viera | Fuente: NOAA - Great Lakes Environmental Research Laboratory.', xref='paper', yref='paper',
+             x=0.5, xanchor='center', yanchor='top', showarrow=False, y=-0.15)
+    ]
+)
+
+# Mostrar el gráfico
+fig.show()
+```
+
+```{=html}
+<div style = "text-align:justify";>La herramienta utilizada fue Python y Plotly, el diseño aplicado es claro y funcional, con un buen balance de color y forma que ayuda a transmitir la complejidad de los datos de una manera accesible. La inclusión de cajas de bigotes dentro de los violines proporciona una visión más tradicional de la estadística descriptiva, mientras que los puntos individuales ofrecen una capa adicional de detalle, posiblemente representando predicciones individuales o mediciones históricas.<br>
+
+Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/129/#/">https://chart-studio.plotly.com/~MauricioViera95/129/#/</a>
+
+</div>
+```
+## Conclusiones
+
+```{=html}
+<div style = "text-align:justify";>
+
+* Este desafío ha ofrecido una amplia gama de temas, desde comparaciones y distribuciones hasta relaciones y series de tiempo, permitiendo a los participantes explorar y desarrollar habilidades en una variedad de técnicas de visualización.<br>
+* Al abordar temas como "data day" con foco en organizaciones como la OECD y el Asian Development Bank, y "theme days" sobre áreas específicas como ILO Africa, el desafío ha servido como un puente entre la teoría de la visualización de datos y su aplicación práctica en contextos reales y actuales. Esto no solo ha enriquecido el conocimiento técnico, sino que también ha mejorado la capacidad para comunicar información compleja de manera efectiva a través de gráficos.</div>
+```
+## Bibliografía
+
+```{=html}
+<div style = "text-align:justify";>
+Asian Development Bank. (2024). ADB Data Library. Recuperado el [abril de 2024], de <a href="https://data.adb.org/">https://data.adb.org/</a><br>
+Beniaguev, D. (2018). Historical Hourly Weather Data 2012-2017. Recuperado el [abril de 2024], de <a href="https://www.kaggle.com/datasets/selfishgene/historical-hourly-weather-data">https://www.kaggle.com/datasets/selfishgene/historical-hourly-weather-data</a><br>
+Bioweb. (2024). Diversidad Biogeográfica de Aves. Recuperado el [abril de 2024], de <a href="https://bioweb.bio/faunaweb/avesweb/DiversidadBiogeografia/">https://bioweb.bio/faunaweb/avesweb/DiversidadBiogeografia/</a><br>
+DATA.GOV. (2024a). Crime Data from 2020 to Present. Recuperado [abril de 2024], de <a href="https://catalog.data.gov/dataset/crime-data-from-2020-to-present">https://catalog.data.gov/dataset/crime-data-from-2020-to-present</a><br>
+DATA.GOV. (2024b). National Obesity by State. Recuperado el [abril de 2024], de <a href="https://catalog.data.gov/dataset/national-obesity-by-state-d765a">https://catalog.data.gov/dataset/national-obesity-by-state-d765a</a><br>
+El Universo. (2024, enero 2). En Guamaní, en el sur de Quito, hubo mayor afectación al clima por la quema de los años viejos. El Universo. <a href="https://www.eluniverso.com/noticias/ecuador/quito-clima-1-enero-2024-quema-anos-viejos-nota/">https://www.eluniverso.com/noticias/ecuador/quito-clima-1-enero-2024-quema-anos-viejos-nota/</a><br>
+GLERL, NOAA. (s.f.). Climate Forecasts. Recuperado el [abril de 2024], de <a href="https://www.glerl.noaa.gov/data/climateForecasts/">https://www.glerl.noaa.gov/data/climateForecasts/</a><br>
+Hamed, Y. (2022). Song Popularity Dataset. Recuperado el [abril de 2024], de <a href="https://www.kaggle.com/datasets/yasserh/song-popularity-dataset">https://www.kaggle.com/datasets/yasserh/song-popularity-dataset</a><br>
+ILOSTAT. (2024). ILOSTAT data for Africa. Recuperado el [abril de 2024], de <a href="https://ilostat.ilo.org/data/africa/">https://ilostat.ilo.org/data/africa/</a><br>
+INEC. (2024). Censo Nacional de Población y Vivienda. Recuperado el [abril de 2024], de <a href="https://www.censoecuador.gob.ec/">https://www.censoecuador.gob.ec/</a><br>
+Macrotrends. (2024). Macrotrends: The Premier Research Platform for Long Term Investors. Recuperado el [abril de 2024], de <a href="https://www.macrotrends.net/">https://www.macrotrends.net/</a><br>
+MINEDUC. (2024). Base de datos. Recuperado [abril de 2024], de <a href="https://educacion.gob.ec/base-de-datos/">https://educacion.gob.ec/base-de-datos/</a><br>
+NYDP. (2024). Supplementary Homicide Report. Recuperado [abril de 2024], de <a href="https://www.nyc.gov/site/nypd/stats/reports-analysis/homicide.page">https://www.nyc.gov/site/nypd/stats/reports-analysis/homicide.page</a><br>
+OECD. (2024). OECD Data. Recuperado [abril de 2024], de <a href="https://data.oecd.org/">https://data.oecd.org/</a><br>
+Our World in Data. (2024). Charts & Graphs. Recuperado el [abril de 2024], de <a href="https://ourworldindata.org/charts">https://ourworldindata.org/charts</a><br>
+Prasad, J. (2024). Mobile Phone Feature Dataset. Recuperado el [abril de 2024], de <a href="https://www.kaggle.com/datasets/jagkrinoprasad/mobile-phone-feature-dataset">https://www.kaggle.com/datasets/jagkrinoprasad/mobile-phone-feature-dataset</a><br>
+Secretaría de Ambiente de Quito. (2024). Contaminación del aire de Centro, Quito, Ecuador: Índice PM2.5 de Calidad del Aire (ICA) en tiempo real. Recuperado abril de 2024], de <a href="https://aqicn.org/city/ecuador/quito/centro/es/">https://aqicn.org/city/ecuador/quito/centro/es/</a><br>
+SIPA. (2024). Cifras territoriales. Recuperado el [abril de 2024], de <a href="http://sipa.agricultura.gob.ec/index.php/cifras-territoriales">http://sipa.agricultura.gob.ec/index.php/cifras-territoriales</a><br>
+The Paleobiology Database. (2024). Home - The Paleobiology Database. Recuperado el [abril de 2024], de <a href="https://paleobiodb.org/#/">https://paleobiodb.org/#/</a><br>
+The World Bank. (2024). World Bank DataBank. Recuperado el [abril de 2024], de <a href="https://databank.worldbank.org/">https://databank.worldbank.org/</a><br>
+USGS. (2024). USGS Water Data for the Nation. Recuperado el [abril de 2024], de <a href="https://waterdata.usgs.gov/nwis">https://waterdata.usgs.gov/nwis</a><br>
+</div>
+```
