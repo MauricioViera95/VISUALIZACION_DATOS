@@ -2543,6 +2543,17 @@ Se agrega un enlace para poder interactuar con el gráfico de manera interactiva
 * Este desafío ha ofrecido una amplia gama de temas, desde comparaciones y distribuciones hasta relaciones y series de tiempo, permitiendo a los participantes explorar y desarrollar habilidades en una variedad de técnicas de visualización.<br>
 * Al abordar temas como "data day" con foco en organizaciones como la OECD y el Asian Development Bank, y "theme days" sobre áreas específicas como ILO Africa, el desafío ha servido como un puente entre la teoría de la visualización de datos y su aplicación práctica en contextos reales y actuales. Esto no solo ha enriquecido el conocimiento técnico, sino que también ha mejorado la capacidad para comunicar información compleja de manera efectiva a través de gráficos.</div>
 ```
+## Enlace a GitHub
+
+```{=html}
+<div style = "text-align:justify";>
+
+Se adjunta el enlace a GitHub donde se tiene acceso a los datos preprocesados tras su descarga de las distintas fuentes, además de los respaldos de los archivos *.html y *qmd.<br>
+
+<a href="https://github.com/MauricioViera95/VISUALIZACION_DATOS/tree/main">https://github.com/MauricioViera95/VISUALIZACION_DATOS/tree/main</a>
+
+</div>
+```
 ## Bibliografía
 
 ```{=html}
