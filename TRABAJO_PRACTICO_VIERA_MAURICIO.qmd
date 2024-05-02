@@ -122,7 +122,7 @@ fig.update_layout(
             opacity=0.8
         ),
         dict(
-            text="Author: Mauricio Viera | Source: https://catalog.data.gov/dataset/crime-data-from-2020-to-present",
+            text="Author: Mauricio Viera | Source: DATA.GOV",
             showarrow=False,
             xref="paper",
             yref="paper",
@@ -138,7 +138,8 @@ fig.update_layout(
 ```
 
 ```{=html}
-<div style = "text-align:justify";>La herramienta elegida, en este caso, un gráfico sunburst (Python y librería Plotly), fue seleccionada por su capacidad para manejar datos complejos y presentarlos de manera que es tanto informativa como visualmente atractiva. Permite una representación jerárquica de los datos que es ideal para mostrar las capas de información dentro de la estructura general de los datos de crimen.<br>
+<div style = "text-align:justify";>La herramienta elegida, en este caso, un gráfico sunburst (Python y librería Plotly), fue seleccionada por su capacidad para manejar datos complejos y presentarlos de manera que es tanto informativa como visualmente atractiva. Permite una representación jerárquica de los datos que es ideal para mostrar las capas de información dentro de la estructura general de los datos de crimen.<br><br>
+Cabe recalcar que se podría interpretar que existe la posibilidad de considerar este gráfico como no factible debido a las distintas categorías que se despliegan de cada raza de la víctima de 2 a 5 categorías de crimen, pero es importante mencionar que al ser una propuesta interactiva, se vuelve al gráfico más amigable para la audiencia, de manera que no es problema poder sacar información de los sectores más pequeños de cada categoría de crimen por raza. Se aprovecha de mejor manera el gráfico con el enlace compartido a continuación. <br><br>
 
 Se agrega un enlace para poder interactuar con el gráfico de manera interactiva en Plotly: <a href="https://chart-studio.plotly.com/~MauricioViera95/74/#/">https://chart-studio.plotly.com/~MauricioViera95/74/#/</a>
 
@@ -282,7 +283,7 @@ fig.update_layout(
         ),
         # Ajustar la posición de la fuente para que aparezca en la parte inferior
         dict(
-            text="Author: Mauricio Viera | Source: https://catalog.data.gov/dataset/crime-data-from-2020-to-present",
+            text="Author: Mauricio Viera | Source: DATA.GOV",
             showarrow=False,
             align="left",
             x=0.5, y=-0.1,
