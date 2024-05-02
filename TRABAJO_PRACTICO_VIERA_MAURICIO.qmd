@@ -38,10 +38,10 @@ Para esta temática se ha elegido utilizar datos sobre crimen específicamente e
 ```{=html}
 <div style = "text-align:justify";>
 
-<b>¿Qué se espera de la gráfica?</b> Se pretende dar a conocer una comparación de los crímenes cometidos según la raza de cada habitante de la ciudad.
+<b>¿Qué se espera de la gráfica?</b> Se pretende dar a conocer una comparación de los crímenes cometidos según la raza de cada habitante de la ciudad.<br>
 
 
-<b>¿Qué espera la audiencia?</b> La audiencia espera obtener una imagen fidedigna de cómo los diferentes crímenes afectan a diversas comunidades en Los Ángeles, con la posibilidad de identificar patrones o desproporciones que podrían informar sobre necesidades específicas o respuestas de política.
+<b>¿Qué espera la audiencia?</b> La audiencia espera obtener una imagen fidedigna de cómo los diferentes crímenes afectan a diversas comunidades en Los Ángeles, con la posibilidad de identificar patrones o desproporciones que podrían informar sobre necesidades específicas o respuestas de política.<br>
 
 El mensaje principal que transmite este gráfico es que hay una distribución variada de crímenes entre diferentes comunidades raciales, lo que podría indicar la necesidad de enfoques diferenciados para abordar y prevenir el crimen en cada comunidad.</div>
 ```
@@ -510,7 +510,7 @@ fig.update_traces(textfont=dict(size=60))
 ```{=html}
 <div style = "text-align:justify";>
 
-<b>¿Qué se espera de la gráfica?</b>Presentar una comparación visual del soporte institucional educativo en diferentes provincias de Ecuador, desglosado por tipo de institución (fiscal, fisco-misional, municipal y particular).
+<b>¿Qué se espera de la gráfica?</b> Presentar una comparación visual del soporte institucional educativo en diferentes provincias de Ecuador, desglosado por tipo de institución (fiscal, fisco-misional, municipal y particular).
 
 También se busca destacar diferencias y patrones en la distribución de recursos o gestión educativa a lo largo de las provincias. <br>
 
@@ -621,7 +621,7 @@ Para realizar este tipo de gráfico, se procedió a utilizar los mismos datos de
 ```{=html}
 <div style = "text-align:justify";>
 
-<b>¿Qué se espera de la gráfica?</b>Comunicar la variabilidad estacional de los niveles de contaminantes en el aire en Quito. Se busca ilustrar a través de figuras circulares cómo estos contaminantes fluctúan a lo largo de los meses del año, proporcionando información valiosa sobre los períodos de mayor o menor calidad del aire.<br>
+<b>¿Qué se espera de la gráfica?</b> Comunicar la variabilidad estacional de los niveles de contaminantes en el aire en Quito. Se busca ilustrar a través de figuras circulares cómo estos contaminantes fluctúan a lo largo de los meses del año, proporcionando información valiosa sobre los períodos de mayor o menor calidad del aire.<br>
 
 
 <b>¿Qué espera la audiencia?</b> La audiencia esperaría discernir patrones estacionales o tendencias en los niveles de contaminación del aire y obtener una comprensión visual rápida de cuándo se presentan los niveles más altos de contaminantes, lo cual es crucial para la salud pública y la planificación ambiental.<br>
@@ -666,7 +666,7 @@ Se muestra la distribución de cifras territoriales en cuanto al uso del suelo d
 ```{=html}
 <div style = "text-align:justify";>
 
-<b>¿Qué se espera de la gráfica?</b>Presentar una visión clara del uso del suelo y la producción agrícola en la provincia de Pichincha, de manera que, se destaquen los cultivos con mayor y menor superficie, así como comparando la producción agrícola de Pichincha con otras provincias a nivel nacional.<br>
+<b>¿Qué se espera de la gráfica?</b> Presentar una visión clara del uso del suelo y la producción agrícola en la provincia de Pichincha, de manera que, se destaquen los cultivos con mayor y menor superficie, así como comparando la producción agrícola de Pichincha con otras provincias a nivel nacional.<br>
 
 
 <b>¿Qué espera la audiencia?</b> La audiencia espera obtener información precisa y comprensible sobre la distribución del uso del suelo en la agricultura de Pichincha y cómo esto se traduce en producción agrícola. Están buscando discernir rápidamente cuáles son los cultivos más y menos prevalentes y cómo la provincia se compara con otras regiones del país en términos de producción.<br>
@@ -696,11 +696,11 @@ La audiencia objetivo de esta visualización incluye profesionales de la salud p
 ```{=html}
 <div style = "text-align:justify";>
 
-<b>¿Qué se espera de la gráfica?</b>Proporcionar una representación geoespacial de las tasas de obesidad a lo largo de Estados Unidos para identificar patrones geográficos en la prevalencia de la obesidad. 
+<b>¿Qué se espera de la gráfica?</b> Proporcionar una representación geoespacial de las tasas de obesidad a lo largo de Estados Unidos para identificar patrones geográficos en la prevalencia de la obesidad. 
 Esto puede ser útil para señalar las áreas que pueden requerir atención en términos de recursos de salud pública y programas de intervención.<br>
 
 
-<b>¿Qué espera la audiencia?</b>La audiencia esperaría discernir tendencias geográficas y regionales en las tasas de obesidad para comprender mejor cómo varía la obesidad en el país. También esperarían que la visualización revelara áreas de alta y baja prevalencia, proporcionando una base para el análisis y la discusión sobre las causas y posibles soluciones.<br>
+<b>¿Qué espera la audiencia?</b> La audiencia esperaría discernir tendencias geográficas y regionales en las tasas de obesidad para comprender mejor cómo varía la obesidad en el país. También esperarían que la visualización revelara áreas de alta y baja prevalencia, proporcionando una base para el análisis y la discusión sobre las causas y posibles soluciones.<br>
 
 El mensaje clave es presentar una perspectiva clara y visual de las variaciones en la prevalencia de la obesidad por región, lo que podría influir en las estrategias de salud pública y en el destino de los recursos para combatir la obesidad.
 <br><br>
@@ -1603,7 +1603,7 @@ El gráfico está diseñado para una audiencia que puede incluir demógrafos, re
 <b>¿Qué se espera de la gráfica?</b> Resaltar las diferencias en la cantidad de migrantes ecuatorianos a varios países a lo largo del tiempo, lo cual podría servir para informar sobre las tendencias migratorias y posiblemente los factores que influyen en estas tendencias.<br>
 
 
-<b>¿Qué espera la audiencia?</b>La audiencia espera comprender cuál fue el destino preferido por los migrantes ecuatorianos desde el año 1960 a 2000, y las cifras pueden indicar la relevancia de ciertos países para la comunidad migrante en ese momento. También podrían estar interesados en los factores sociales, económicos o políticos que condujeron a estas tendencias.<br>
+<b>¿Qué espera la audiencia?</b> La audiencia espera comprender cuál fue el destino preferido por los migrantes ecuatorianos desde el año 1960 a 2000, y las cifras pueden indicar la relevancia de ciertos países para la comunidad migrante en ese momento. También podrían estar interesados en los factores sociales, económicos o políticos que condujeron a estas tendencias.<br>
 
 El mensaje clave del gráfico es que Estados Unidos fue el país de destino más popular para los migrantes ecuatorianos desde el año 1960 al 2000, seguido por España, con Argentina y Alemania recibiendo números significativamente menores de migrantes. Este patrón puede llevar a discusiones sobre las políticas de inmigración de los países de destino, las redes migratorias existentes y las oportunidades económicas o desafíos en los países de origen y destino.
 </div>
